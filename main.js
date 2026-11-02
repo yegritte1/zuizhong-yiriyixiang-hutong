@@ -200,6 +200,7 @@ function frame(now) {
 
   const r = S3.update({ prog, h, ovT, mx, my, now, intro: introAlive ? 1 - introP : 0 });
   updateAmbient(h);
+  if (snapSpot) { try { takeSnap(snapSpot); } catch (e) {} snapSpot = null; }
 
   haze.style.opacity = h < 8 ? clamp((8 - h) / 3) * .55 : 0;
   // 交叉溶解时加一层晨雾纸色，盖住 2D/3D 的细节差异
@@ -262,8 +263,8 @@ function openSpot(s) {
   $('#panelKicker').textContent = s.kicker;
   $('#panelTitle').textContent = s.title;
   $('#panelText').innerHTML = s.text.map(t => `<p>${t}</p>`).join('');
-  const pi = $('.panel-img');
-  if (s.img) { pi.style.display = ''; $('#panelImg').src = `./img/${s.img}.webp`; } else pi.style.display = 'none';
+  // 配图：直接截取当前 3D 画面里这个热点周围的一块，和场景风格统一
+  snapSpot = s;
   const act = $('#panelActions'); act.innerHTML = '';
   if (s.game) {
     const g = document.createElement('button'); g.className = 'btn';
@@ -277,6 +278,16 @@ function openSpot(s) {
   $('#panel').classList.add('open');
 }
 function closePanel() { $('#panel').classList.remove('open'); }
+let snapSpot = null;
+const snapCv = document.createElement('canvas');
+function takeSnap(s) {
+  const gl = $('#gl'), p = S3.project(S3.anchors[s.id]);
+  const sx = gl.width / innerWidth, W = Math.min(gl.width, 760 * sx), H = W * 9 / 16;
+  const cx = clamp(p.x * sx - W / 2, 0, gl.width - W), cy = clamp(p.y * sx - H * .55, 0, gl.height - H);
+  snapCv.width = 760; snapCv.height = 428;
+  snapCv.getContext('2d').drawImage(gl, cx, cy, W, H, 0, 0, 760, 428);
+  $('#panelImg').src = snapCv.toDataURL('image/jpeg', .86);
+}
 $('#panelClose').onclick = closePanel;
 $('#gl').addEventListener('click', closePanel);
 

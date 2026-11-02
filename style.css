@@ -165,14 +165,20 @@ body.night .tl.on{color:#f2c46b}
 #scrollHint.hide{opacity:0}
 
 /* ================= PANEL ================= */
-#panel{position:fixed;top:0;right:0;bottom:0;width:min(520px,92vw);background:#f8f1e1;z-index:40;transform:translateX(105%);
-  transition:transform .9s cubic-bezier(.7,0,.2,1);box-shadow:-20px 0 60px rgba(60,40,20,.18);display:flex;flex-direction:column;overflow-y:auto}
-#panel.open{transform:none}
-.panel-close{position:absolute;right:18px;top:12px;font-size:30px;font-weight:300;z-index:2;color:var(--ink)}
+#panel{position:fixed;left:50%;top:50%;width:min(440px,90vw);max-height:84vh;background:#f8f1e1;z-index:40;border-radius:3px;
+  transform:translate(-50%,-46%) scale(.82);opacity:0;pointer-events:none;
+  transition:transform .55s cubic-bezier(.2,1.25,.35,1),opacity .35s ease;
+  box-shadow:0 0 0 100vmax rgba(28,24,20,0),0 24px 70px rgba(40,28,16,.35);display:flex;flex-direction:column;overflow-y:auto;
+  outline:1px solid rgba(184,50,42,.35);outline-offset:-8px}
+#panel.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto;box-shadow:0 0 0 100vmax rgba(28,24,20,.28),0 24px 70px rgba(40,28,16,.35)}
+#panel::-webkit-scrollbar{width:0}
+.panel-close{position:absolute;right:14px;top:10px;width:34px;height:34px;border-radius:50%;background:rgba(248,241,225,.85);font-size:24px;line-height:32px;font-weight:300;z-index:2;color:var(--ink)}
 .panel-img{width:100%;aspect-ratio:16/9;overflow:hidden;background:#efe4cb}
-.panel-img img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;transform:scale(1.08);transition:transform 6s ease-out}
+.panel-img img{width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 6s ease-out}
 #panel.open .panel-img img{transform:scale(1)}
-.panel-body{padding:28px 36px 40px}
+.panel-body{padding:24px 34px 32px;text-align:center}
+#panelText p{text-align:left}
+.panel-actions{justify-content:center}
 .panel-kicker{font-size:12px;letter-spacing:.5em;color:var(--red);margin-bottom:12px}
 #panelTitle{font-size:2rem;letter-spacing:.35em;font-weight:600;margin-bottom:18px}
 #panelText p{font-size:15px;line-height:2;color:#4a443c;margin-bottom:12px;text-align:justify}

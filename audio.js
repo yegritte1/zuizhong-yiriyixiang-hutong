@@ -33,7 +33,7 @@ function init() {
   const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true;
   windF = ctx.createBiquadFilter(); windF.type = 'lowpass'; windF.frequency.value = 500;
   windG = ctx.createGain(); windG.gain.value = .015;
-  ns.connect(windF); windF.connect(windG); windG.connect(dry); ns.start();
+  // 风声底噪已去掉（听感像电流“滋啦”声）
 }
 function out(gain, pan = 0, wetAmt = .3) {
   const g = ctx.createGain(); g.gain.value = gain;
@@ -62,10 +62,6 @@ function pigeonWhistle() {
     g.gain.value = [1, .55, .3, .4][i];
     os.connect(g); g.connect(o.g); os.start(t); lfo.start(t); os.stop(t + dur + .1); lfo.stop(t + dur + .1);
   });
-  // 哨口的气声
-  const n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), ng = ctx.createGain();
-  n.buffer = noiseBuf(dur); bp.type = 'bandpass'; bp.frequency.value = base * 1.5; bp.Q.value = 6; ng.gain.value = .35;
-  n.connect(bp); bp.connect(ng); ng.connect(o.g); n.start(t);
 }
 // 叫卖：“豆汁儿——焦圈儿”（共振峰合成的远处吆喝）
 function hawker() {
@@ -166,7 +162,6 @@ function cricket() {
 /* ---------- 调度：按时辰安排 ---------- */
 const PLAN = [
   // [声音, 起始时刻, 结束时刻, 最短间隔, 最长间隔]
-  [pigeonWhistle, 4.5, 8.2, 8, 13],
   [pigeonWhistle, 10, 16, 24, 36],
   [birds, 6.8, 17.6, 3, 7],
   [kongzhu, 10.2, 16.5, 8, 13],
@@ -188,8 +183,6 @@ export function updateAmbient(h, dt = .016) {
   // 戏楼锣鼓时段音乐稍让一让，深夜音乐放轻
   const tgtB = (h > 17.2 && h < 20.6 ? .48 : h > 21 ? .5 : 1) * BGM_VOL;
   bgmG.gain.value += (tgtB - bgmG.gain.value) * .02;
-  windF.frequency.value += (tgtF - windF.frequency.value) * .02;
-  windG.gain.value += (tgtG - windG.gain.value) * .02;
 }
 export function setSound(on) {
   enabled = on;
