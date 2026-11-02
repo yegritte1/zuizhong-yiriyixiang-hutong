@@ -7,6 +7,7 @@
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+@font-face{font-family:"YRTitle";src:url("./fonts/title.woff2") format("woff2");font-display:swap}
 html,body{background:var(--paper);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
 body.locked{overflow:hidden}
 button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
@@ -39,28 +40,32 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opa
 .sign-wire{width:52%;height:11vh;border-left:1.5px solid rgba(58,52,44,.75);border-right:1.5px solid rgba(58,52,44,.75);position:relative}
 .sign-wire::after{content:"";position:absolute;left:-4px;right:-4px;bottom:-3px;height:6px;
   background:radial-gradient(circle at 4px 3px,#5a5248 2.5px,transparent 3px),radial-gradient(circle at calc(100% - 4px) 3px,#5a5248 2.5px,transparent 3px)}
-.street-sign{position:relative;padding:18px 46px 14px;background:linear-gradient(180deg,#2c5a91,#1f4677);color:#f6f1e4;text-align:center;
-  border-radius:4px;box-shadow:inset 0 0 0 3px #1f4677,inset 0 0 0 5px #e9e3d2,0 10px 30px rgba(30,40,60,.25),0 2px 0 rgba(0,0,0,.15);
-  transform-origin:50% -11vh;animation:swing 6s ease-in-out infinite}
-.street-sign::after{content:"";position:absolute;inset:0;border-radius:4px;pointer-events:none;
-  background:linear-gradient(115deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,0) 35%),radial-gradient(circle at 80% 85%,rgba(120,90,50,.18),rgba(0,0,0,0) 40%)}
-@keyframes swing{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
-.sign-cn{font-size:clamp(2.4rem,4.6vw,4.2rem);font-weight:900;letter-spacing:.5em;padding-left:.5em;line-height:1.15}
-.sign-py{font-family:"Helvetica Neue",Arial,sans-serif;font-size:clamp(.7rem,1vw,.95rem);letter-spacing:.55em;padding-left:.55em;margin-top:6px;opacity:.9}
-.sign-arrow{display:block;margin-top:10px;padding-top:8px;border-top:1px solid rgba(246,241,228,.5);font-size:.85rem;letter-spacing:.6em;padding-left:.6em}
+.street-sign{position:relative;padding:20px 54px 14px 62px;background:linear-gradient(180deg,#2d5c93 0%,#224d81 60%,#1c4272 100%);color:#f7f1e2;text-align:center;
+  border-radius:6px;box-shadow:inset 0 0 0 4px #1c4272,inset 0 0 0 6px #ece5d3,inset 0 0 0 7px rgba(28,66,114,.6),0 14px 34px rgba(30,40,60,.22),0 2px 0 rgba(0,0,0,.12);
+  transform-origin:50% -11vh;animation:swing 7s ease-in-out infinite}
+.street-sign::before,.street-sign::after{content:"";position:absolute;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#f4efe2,#9a9384 70%)}
+.street-sign::before{left:16px}.street-sign::after{right:16px}
+@keyframes swing{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1deg)}}
+.sign-cn{font-family:"YRTitle",var(--serif);font-size:clamp(2.8rem,5.2vw,4.8rem);font-weight:400;letter-spacing:.32em;padding-left:.32em;line-height:1.05;text-shadow:0 1px 0 rgba(0,0,0,.18)}
+.sign-py{font-family:"Helvetica Neue",Arial,sans-serif;font-size:clamp(.62rem,.8vw,.78rem);letter-spacing:.9em;padding-left:.9em;margin-top:8px;opacity:.78}
+.sign-seal{position:absolute;right:-14px;bottom:-14px;width:40px;height:40px;display:grid;place-items:center;font-family:"YRTitle",var(--serif);font-size:24px;color:#fbefdc;
+  background:#b8322a;border-radius:4px;box-shadow:inset 0 0 0 2px #b8322a,inset 0 0 0 3.5px rgba(251,239,220,.75),0 3px 8px rgba(120,30,20,.25);transform:rotate(-6deg)}
+.sign-sub{margin-top:26px;display:flex;align-items:center;gap:14px;font-family:"YRTitle",var(--serif);font-size:clamp(1.05rem,1.5vw,1.35rem);letter-spacing:.42em;padding-left:.42em;color:#3a342c;
+  text-shadow:0 0 12px #f6eedb,0 0 4px #f6eedb,0 0 2px #f6eedb}
+.sign-sub i{display:block;width:38px;height:1px;background:#b8322a;opacity:.7}
 
-.intro-kicker{background:rgba(246,238,219,.85);padding:6px 12px;position:absolute;left:40px;top:34px;font-size:13px;letter-spacing:.6em;color:var(--ink);font-weight:600;z-index:3}
-.intro-meta{position:absolute;right:40px;top:34px;display:flex;align-items:center;gap:12px;font-size:13px;letter-spacing:.3em;color:var(--ink);font-weight:600;z-index:3;background:rgba(246,238,219,.85);padding:6px 12px;backdrop-filter:blur(3px)}
+.intro-kicker{padding:4px 0 6px;border-bottom:1px solid rgba(184,50,42,.55);text-shadow:0 0 10px #f6eedb,0 0 3px #f6eedb;position:absolute;left:40px;top:34px;font-size:13px;letter-spacing:.6em;color:var(--ink);font-weight:600;z-index:3}
+.intro-meta{position:absolute;right:40px;top:34px;display:flex;align-items:center;gap:12px;font-size:13px;letter-spacing:.3em;color:var(--ink);font-weight:600;z-index:3;padding:4px 0 6px;text-shadow:0 0 10px #f6eedb,0 0 3px #f6eedb}
 .intro-meta i{width:40px;height:1px;background:var(--red)}
 .intro-meta span:first-child{color:var(--red);letter-spacing:.15em}
 
-.intro-enter{position:absolute;left:50%;top:40vh;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:4;
+.intro-enter{position:absolute;left:50%;top:auto;bottom:9vh;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;z-index:4;
   color:var(--ink);opacity:calc(1 - var(--p)*3)}
-.enter-txt{font-size:clamp(1rem,1.4vw,1.25rem);letter-spacing:.6em;padding:10px 18px 10px 28px;background:rgba(246,238,219,.82);backdrop-filter:blur(4px);
-  border:1px solid rgba(184,50,42,.5);color:var(--red);transition:background .3s,color .3s}
-.intro-enter:hover .enter-txt{background:var(--red);color:#fbefdc}
+.enter-txt{font-family:"YRTitle",var(--serif);font-size:clamp(1.15rem,1.6vw,1.45rem);letter-spacing:.38em;padding:8px 6px 8px 22px;color:var(--red);
+  text-shadow:0 0 14px #f6eedb,0 0 6px #f6eedb,0 0 2px #f6eedb;transition:letter-spacing .5s,color .3s}
+.intro-enter:hover .enter-txt{letter-spacing:.5em;color:#8f2119}
 .enter-line{width:1px;height:34px;background:var(--red);animation:drop 2s infinite}
-.intro-enter small{font-size:12px;letter-spacing:.4em;color:var(--ink);background:rgba(246,238,219,.8);padding:2px 8px}
+.intro-enter small{font-size:11px;letter-spacing:.5em;color:var(--ink-soft);text-shadow:0 0 8px #f6eedb,0 0 3px #f6eedb}
 @keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 .intro-sound{position:absolute;right:40px;bottom:7vh;font-size:12px;letter-spacing:.3em;color:var(--ink-soft);z-index:4;opacity:.8}
 #introBirds .bird{opacity:.55}
@@ -127,6 +132,14 @@ body.night .ch-time{color:#f2c46b}
 #seals{display:flex;gap:8px}
 .seal-slot{width:30px;height:30px;display:grid;place-items:center;font-size:14px;font-weight:900;border:1px dashed rgba(47,43,38,.35);color:rgba(47,43,38,.3);transition:all .6s}
 .seal-slot.on{background:var(--red);color:#fbefdc;border:1px solid var(--red);transform:rotate(-6deg);box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.sound-btn{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.2em;color:inherit;opacity:.7;transition:opacity .3s}
+.sound-btn:hover,.sound-btn.on{opacity:1}
+.sound-btn b{font-weight:400}
+.sound-btn .wave{display:flex;align-items:flex-end;gap:2px;height:14px}
+.sound-btn .wave i{width:2px;height:3px;background:currentColor;transition:height .3s}
+.sound-btn.on .wave i{animation:eq 1.1s ease-in-out infinite}
+.sound-btn.on .wave i:nth-child(2){animation-delay:-.3s}.sound-btn.on .wave i:nth-child(3){animation-delay:-.6s}.sound-btn.on .wave i:nth-child(4){animation-delay:-.85s}
+@keyframes eq{0%,100%{height:3px}50%{height:14px}}
 .map-btn{font-size:14px;letter-spacing:.3em;position:relative;padding-bottom:10px}
 .map-btn i{position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor}
 .map-btn i::after{content:"";position:absolute;right:-2px;top:-3px;border-left:6px solid currentColor;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}

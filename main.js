@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { initMaohou, initKite, initMask } from './games.js';
+import { updateAmbient, setSound, soundOn, soundPref } from './audio.js';
 /* 一日一巷 · 胡同里的时间遗产
  * 一张胡同图，滚动 = 时间流逝；镜头沿胡同由东（晨）向西（夜）飞行，换光不换图。
  */
@@ -198,10 +199,11 @@ function frame(now) {
   const h = lerp(STOPS[ip].h, STOPS[ip + 1].h, it);
 
   const r = S3.update({ prog, h, ovT, mx, my, now, intro: introAlive ? 1 - introP : 0 });
+  updateAmbient(h);
 
   haze.style.opacity = h < 8 ? clamp((8 - h) / 3) * .55 : 0;
   // 交叉溶解时加一层晨雾纸色，盖住 2D/3D 的细节差异
-  const fv = introAlive ? smooth(clamp((introP - .28) / .5)) : 1;
+  const fv = introAlive ? smooth(clamp((introP - .5) / .45)) : 1;
   veil.style.opacity = (Math.sin(fv * Math.PI) * .5 + (1 - fv) * .15 + (introAlive ? 0 : 0)).toFixed(3);
   const so = clamp((h - 20) / 1.5);
   $('#stars').style.opacity = so;
@@ -344,6 +346,10 @@ $('#finaleClose').onclick = () => { $('#finale').classList.remove('open'); docum
 /* ---------------- HUD 按钮 ---------------- */
 $('#mapBtn').onclick = () => { overview = !overview; $('#mapBtn').firstChild.textContent = overview ? '返 回' : '全 图'; };
 $('#menuBtn').onclick = () => $('#menu').classList.add('open');
+const sndBtn = $('#soundBtn');
+function paintSound() { sndBtn.classList.toggle('on', soundOn()); sndBtn.querySelector('b').textContent = soundOn() ? '声 开' : '声 关'; }
+sndBtn.onclick = e => { e.stopPropagation(); setSound(!soundOn()); paintSound(); };
+paintSound();
 $('#menuClose').onclick = () => $('#menu').classList.remove('open');
 
 /* ---------------- 首页：胡同口 ---------------- */
@@ -351,7 +357,7 @@ document.body.classList.add('locked');
 scrollTo(0, 0);
 const intro = $('#intro');
 let entering = false, enterT0 = 0, imx = 0, imy = 0, peekP = 0;
-const ENTER_MS = 1600;
+const ENTER_MS = 5200;   // 慢慢推门、慢慢往里走
 intro.addEventListener('mousemove', e => { imx = e.clientX / innerWidth - .5; imy = e.clientY / innerHeight - .5; });
 function finishIntro() {
   if (!intro.isConnected) return;
@@ -361,7 +367,7 @@ function finishIntro() {
 function introLoop(now) {
   if (!intro.isConnected) return;
   // 进入动画按真实时间推进（与帧率无关，电脑卡也不会卡在首页）
-  if (entering) { const t = clamp((performance.now() - enterT0) / ENTER_MS); introP = Math.max(peekP, .06 + t * .94 * (2 - t)); }
+  if (entering) { const t = clamp((performance.now() - enterT0) / ENTER_MS); introP = Math.max(peekP, .04 + .96 * (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)); }
   else introP += (peekP - introP) * .15;
   const cur = intro.style;
   const ox = parseFloat(cur.getPropertyValue('--mx')) || 0, oy = parseFloat(cur.getPropertyValue('--my')) || 0;
@@ -369,7 +375,7 @@ function introLoop(now) {
   cur.setProperty('--my', (oy + (imy - oy) * .06).toFixed(4));
   cur.setProperty('--p', introP.toFixed(4));
   // 2D 胡同口与 3D 胡同同视角交叉溶解（由晨雾遮罩过渡，不再用耗性能的模糊滤镜）
-  const f = smooth(clamp((introP - .25) / .55));
+  const f = smooth(clamp((introP - .5) / .45));
   cur.opacity = (1 - f).toFixed(3);
   if (entering && introP >= .999) return finishIntro();
   requestAnimationFrame(introLoop);
@@ -379,10 +385,11 @@ function enter() {
   entering = true; enterT0 = performance.now();
   intro.style.pointerEvents = 'none';           // 立刻放行，不再挡住页面
   document.body.classList.remove('locked');
-  setTimeout(finishIntro, ENTER_MS + 600);      // 兜底：无论如何 2 秒后进入
+  setTimeout(finishIntro, ENTER_MS + 900);      // 兜底：无论如何都会进入
+  if (soundPref()) { setSound(true); paintSound(); }   // 首次交互即开声（浏览器要求用户手势）
 }
 // 轻轻一滑 / 一点 / 任意键就进入
-intro.addEventListener('wheel', e => { e.preventDefault(); if (Math.abs(e.deltaY) + Math.abs(e.deltaX) > 2) { peekP = .12; enter(); } }, { passive: false });
+intro.addEventListener('wheel', e => { e.preventDefault(); if (Math.abs(e.deltaY) + Math.abs(e.deltaX) > 2) { peekP = .04; enter(); } }, { passive: false });
 let ty0 = null;
 intro.addEventListener('touchstart', e => { ty0 = e.touches[0].clientY; }, { passive: true });
 intro.addEventListener('touchmove', e => { if (ty0 !== null && Math.abs(ty0 - e.touches[0].clientY) > 12) enter(); }, { passive: true });

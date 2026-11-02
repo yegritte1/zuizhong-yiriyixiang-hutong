@@ -23,27 +23,33 @@ export const MODEL_SLOTS = {
 
 /* ---------- 镜头节点（与 main.js 的 STOPS 一一对应） ---------- */
 const CAMS = [
-  { p: [128, 2.6, 0],  t: [40, 15, 0] },      // 拂晓 · 站在胡同口（与首页同视角）
-  { p: [104, 7.5, 21], t: [95, 2.2, 6] },    // 早点摊
-  { p: [88.5, 4.6, -10.5], t: [84, 1.1, -15] }, // 毛猴（东侧院工作台）
-  { p: [14, 34, 14],   t: [0, 0, -17] },     // 四合院（俯看院心）
-  { p: [2, 11, -6],     t: [-30, 12, 22] },   // 沙燕（胡同里仰看风筝）
-  { p: [-74, 9, -4],   t: [-90, 5, 14] },    // 戏楼
-  { p: [-102, 4.2, 4],  t: [-104, 2.6, 13] },  // 脸谱（后台）
-  { p: [-70, 62, -95], t: [-25, 0, 0] }      // 深夜 · 西头回望
+  { p: [128, 2.6, 0],  t: [40, 15, 0] },          // 拂晓 · 站在胡同口（与首页同视角）
+  { p: [101.5, 3.6, 15.5], t: [95.5, 1.9, 6.5] }, // 早点摊（略高平视，摊主与蒸笼入画）
+  { p: [86.5, 2.7, -10.4], t: [84, 1.15, -15] }, // 毛猴（贴近工作台，平视）
+  { p: [21, 13, 2],    t: [-1, 1.5, -18] },       // 四合院（斜 45° 越过门楼看院心与下棋的大爷）
+  { p: [-7, 2.6, -2.5], t: [-25, 10, 13] },        // 沙燕（胡同里仰看：放风筝的孩子 + 风筝）
+  { p: [-84, 12.5, -13], t: [-90, 5.5, 11] },     // 戏楼（拉远，越过对面屋顶看整座戏楼）
+  { p: [-98.6, 4.3, 3.2], t: [-104.5, 2, 13] },    // 脸谱（后台门口）
+  { p: [-70, 62, -95], t: [-25, 0, 0] }          // 深夜 · 西头回望
 ];
 
 /* ---------- 光照关键帧 ---------- */
 const LIGHT = [
-  { h: 5,    top: '#a9b8c8', hor: '#e6e2da', sun: '#ffd9b0', si: .35, hs: '#b9c6d6', hg: '#c9bfac', hi: 1.0, fn: 30,  ff: 230, lamp: .3, night: 0 },
-  { h: 6.5,  top: '#d6cfcb', hor: '#f3e1cf', sun: '#ffd2a0', si: 1.3, hs: '#dcdcd8', hg: '#d8ccb4', hi: .85, fn: 60,  ff: 320, lamp: 0,  night: 0 },
-  { h: 9,    top: '#e8e1d0', hor: '#f6eedb', sun: '#fff1d8', si: 1.9, hs: '#efe9dc', hg: '#d8ccb4', hi: .85, fn: 110, ff: 460, lamp: 0,  night: 0 },
-  { h: 12,   top: '#ece3cd', hor: '#f8f1e0', sun: '#fff8ea', si: 2.2, hs: '#f2ece0', hg: '#d8ccb4', hi: .9,  fn: 120, ff: 480, lamp: 0,  night: 0 },
-  { h: 15,   top: '#ecd8b6', hor: '#f7e6c8', sun: '#ffe2b0', si: 2.0, hs: '#f0e4cc', hg: '#d4c2a2', hi: .85, fn: 110, ff: 460, lamp: 0,  night: 0 },
-  { h: 17.5, top: '#e3a274', hor: '#f5c99a', sun: '#ff9a55', si: 1.7, hs: '#f0b890', hg: '#a88a70', hi: .65, fn: 80,  ff: 380, lamp: .25,night: 0 },
-  { h: 19,   top: '#5d5478', hor: '#c98a78', sun: '#ff7a50', si: .55, hs: '#7d7090', hg: '#5a4a4a', hi: .5,  fn: 60,  ff: 330, lamp: .85,night: .35 },
-  { h: 21,   top: '#121a2d', hor: '#2c3450', sun: '#9fb4e0', si: .45, hs: '#3a4668', hg: '#1c1e28', hi: .45, fn: 50,  ff: 300, lamp: 1,  night: 1 },
-  { h: 24,   top: '#0d1424', hor: '#232a42', sun: '#9fb4e0', si: .4,  hs: '#34405e', hg: '#181a22', hi: .42, fn: 50,  ff: 300, lamp: 1,  night: 1 }
+  // 拂晓：天蒙蒙亮，青灰蓝，太阳未出，路灯还亮着，雾重
+  { h: 5,    top: '#6f7f99', hor: '#cdbfba', sun: '#ffb48a', si: .18, hs: '#8593ad', hg: '#6f6c72', hi: .78, fn: 18,  ff: 170, lamp: .75, night: .18 },
+  { h: 5.9,  top: '#93a0b4', hor: '#e2c7b4', sun: '#ffb27a', si: .6,  hs: '#a6aec0', hg: '#8f8580', hi: .8,  fn: 30,  ff: 220, lamp: .3,  night: .06 },
+  // 清晨：太阳刚出，低角度金光，暖橙色，长影子
+  { h: 6.75, top: '#e7c6a6', hor: '#ffd9a6', sun: '#ffac5e', si: 1.9, hs: '#ecd2b8', hg: '#b49a7c', hi: .62, fn: 55,  ff: 300, lamp: 0,   night: 0 },
+  // 上午：清透明亮，天空泛一点蓝
+  { h: 8.5,  top: '#cdd9df', hor: '#f6efe0', sun: '#fff1d6', si: 2.2, hs: '#eae8e2', hg: '#d3c6ac', hi: .85, fn: 100, ff: 440, lamp: 0,   night: 0 },
+  // 正午：最亮、最白、对比最强
+  { h: 12,   top: '#bcd0de', hor: '#f8f5ec', sun: '#ffffff', si: 2.8, hs: '#f6f4ee', hg: '#d8ccb4', hi: 1.0, fn: 130, ff: 500, lamp: 0,   night: 0 },
+  // 午后：开始回暖
+  { h: 15,   top: '#e6d2ae', hor: '#f7e4c2', sun: '#ffdca2', si: 2.1, hs: '#f0e2c8', hg: '#d0bc98', hi: .85, fn: 110, ff: 460, lamp: 0,   night: 0 },
+  { h: 17.5, top: '#e3a274', hor: '#f5c99a', sun: '#ff9a55', si: 1.7, hs: '#f0b890', hg: '#a88a70', hi: .65, fn: 80,  ff: 380, lamp: .25, night: 0 },
+  { h: 19,   top: '#5d5478', hor: '#c98a78', sun: '#ff7a50', si: .55, hs: '#7d7090', hg: '#5a4a4a', hi: .5,  fn: 60,  ff: 330, lamp: .85, night: .35 },
+  { h: 21,   top: '#121a2d', hor: '#2c3450', sun: '#9fb4e0', si: .45, hs: '#3a4668', hg: '#1c1e28', hi: .45, fn: 50,  ff: 300, lamp: 1,   night: 1 },
+  { h: 24,   top: '#0d1424', hor: '#232a42', sun: '#9fb4e0', si: .4,  hs: '#34405e', hg: '#181a22', hi: .42, fn: 50,  ff: 300, lamp: 1,   night: 1 }
 ];
 function lightAt(h) {
   let i = 0;
@@ -233,8 +239,10 @@ function siheyuan(seed, { big = false, plate = false, noTree = false } = {}) {
 
 function operaStage() {
   const g = new THREE.Group();
-  g.add(box(16, 1.4, 12, PAL.stone));
-  g.add(box(16.4, .2, 12.4, '#8d867a', 0, 1.4, 0));
+  g.add(box(18, .25, 14, '#8d867a'));               // 台基（贴地）
+  g.add(box(16, 1.4, 12, PAL.stone, 0, .2, 0));
+  for (let k = 0; k < 3; k++) g.add(box(5, .45 * (k + 1), .55, PAL.stone, 0, 0, 6.0 + (2 - k) * .55)); // 台阶
+  g.add(box(16.4, .2, 12.4, '#8d867a', 0, 1.6, 0));
   // 柱
   [[-6.5, 5], [6.5, 5], [-6.5, -5], [6.5, -5], [-2.2, 5], [2.2, 5]].forEach(([x, z]) => g.add(box(.55, 6, .55, PAL.red, x, 1.6, z)));
   // 后墙
@@ -264,7 +272,7 @@ function breakfastStall() {
     const s = mesh(new THREE.CylinderGeometry(.55, .55, .35, 16), '#c9b48a');
     s.position.set(-.8, 1.2 + i * .36, 0); g.add(s);
   }
-  const lid = mesh(new THREE.ConeGeometry(.6, .35, 16), '#b9a37a'); lid.position.set(-.8, 2.25, 0); g.add(lid);
+  const lid = mesh(new THREE.ConeGeometry(.6, .35, 16), '#b9a37a'); lid.position.set(-.8, 2.25, 0); g.add(lid); g.userData.lid = lid;
   const wok = mesh(new THREE.SphereGeometry(.55, 14, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), '#3a3530'); wok.position.set(.8, 1.4, 0); g.add(wok);
   // 伞
   const pole = mesh(new THREE.CylinderGeometry(.05, .05, 3.6, 6), PAL.pole, { edges: false }); pole.position.set(1.8, 1.8, .6); g.add(pole);
@@ -310,6 +318,47 @@ function kite() {
   return g;
 }
 
+
+/* ---------- 胡同里的人（低面数小人 + 简单动作） ---------- */
+const SKIN = '#e3c09a';
+function person({ shirt = '#5b6b7a', pants = '#3b3a40', hat = null, h = 1.7, kid = false, robe = false, hair = '#2b2724' } = {}) {
+  const g = new THREE.Group(), k = h / 1.7;
+  const legL = new THREE.Group(), legR = new THREE.Group(), armL = new THREE.Group(), armR = new THREE.Group(), body = new THREE.Group(), head = new THREE.Group();
+  const hipY = .82 * k;
+  [legL, legR].forEach((L, i) => {
+    L.position.set((i ? .1 : -.1) * k, hipY, 0);
+    const leg = mesh(new THREE.CylinderGeometry(.065 * k, .055 * k, .78 * k, 6), pants, { angle: 40 }); leg.position.y = -.39 * k; L.add(leg);
+    const shoe = mesh(new THREE.BoxGeometry(.11 * k, .07 * k, .22 * k), '#2a2622', { edges: false }); shoe.position.set(0, -.79 * k, .04 * k); L.add(shoe);
+    g.add(L);
+  });
+  body.position.y = hipY; g.add(body);
+  const torso = robe
+    ? mesh(new THREE.CylinderGeometry(.17 * k, .3 * k, 1.25 * k, 8), shirt, { angle: 40 })
+    : mesh(new THREE.CylinderGeometry(.18 * k, .15 * k, .62 * k, 8), shirt, { angle: 40 });
+  torso.position.y = robe ? .0 : .31 * k; body.add(torso);
+  head.position.y = .72 * k; body.add(head);
+  const hd = mesh(new THREE.SphereGeometry((kid ? .15 : .12) * k, 10, 8), SKIN, { angle: 60 }); hd.position.y = .1 * k; head.add(hd);
+  const hr = mesh(new THREE.SphereGeometry((kid ? .155 : .125) * k, 10, 6, 0, Math.PI * 2, 0, Math.PI * .55), hair, { edges: false }); hr.position.y = .11 * k; hr.rotation.x = -.25; head.add(hr);
+  if (hat === 'cap') { const c = mesh(new THREE.SphereGeometry(.13 * k, 10, 6, 0, Math.PI * 2, 0, Math.PI / 2), '#2b2724', { edges: false }); c.position.y = .15 * k; head.add(c);
+    const kn = mesh(new THREE.SphereGeometry(.025 * k, 6, 4), '#b8322a', { edges: false }); kn.position.y = .28 * k; head.add(kn); }
+  if (hat === 'straw') { const c = mesh(new THREE.ConeGeometry(.26 * k, .14 * k, 12), '#cdb27a', { angle: 50 }); c.position.y = .26 * k; head.add(c); }
+  if (hat === 'opera') { const c = mesh(new THREE.CylinderGeometry(.13 * k, .15 * k, .2 * k, 8), '#c99a4b', { angle: 50 }); c.position.y = .26 * k; head.add(c);
+    [-1, 1].forEach(sx => { const f = mesh(new THREE.ConeGeometry(.03 * k, .5 * k, 4), '#b8322a', { edges: false }); f.position.set(sx * .12 * k, .45 * k, -.05); f.rotation.z = -sx * .5; head.add(f); }); }
+  [armL, armR].forEach((A, i) => {
+    A.position.set((i ? .22 : -.22) * k, .58 * k, 0);
+    const arm = mesh(new THREE.CylinderGeometry(.048 * k, .042 * k, .58 * k, 6), robe ? shirt : shirt, { angle: 40 }); arm.position.y = -.29 * k; A.add(arm);
+    const hand = mesh(new THREE.SphereGeometry(.05 * k, 6, 5), SKIN, { edges: false }); hand.position.y = -.6 * k; A.add(hand);
+    if (robe) { const sl = mesh(new THREE.BoxGeometry(.04 * k, .7 * k, .3 * k), '#f4ece0', { edges: false }); sl.position.set(0, -.85 * k, 0); A.add(sl); } // 水袖
+    body.add(A);
+  });
+  g.userData = { legL, legR, armL, armR, body, head, k };
+  return g;
+}
+function sitPose(p, stoolH = .45) {
+  const u = p.userData; u.legL.rotation.x = u.legR.rotation.x = -1.45;
+  p.position.y = stoolH - .82 * u.k + .05;
+}
+
 /* ---------- 初始化 ---------- */
 export function initScene(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -329,7 +378,7 @@ export function initScene(canvas) {
   sun.castShadow = true;
   sun.shadow.mapSize.set(4096, 4096);
   Object.assign(sun.shadow.camera, { left: -55, right: 55, top: 55, bottom: -55, near: 1, far: 600 });
-  sun.shadow.bias = -.0004; sun.shadow.normalBias = .6;
+  sun.shadow.bias = -.0005; sun.shadow.normalBias = .12;
   scene.add(sun); scene.add(sun.target);
 
   const world = new THREE.Group(); scene.add(world);
@@ -453,9 +502,96 @@ export function initScene(canvas) {
   cage.position.set(1.5, 4.2, -14); world.add(cage);
 
   // 风筝
-  const kiteG = kite(); kiteG.position.set(-30, 22, 14); world.add(kiteG);
-  const kiteLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-30, 22, 14), new THREE.Vector3(-27, 1.2, 20)]);
-  world.add(new THREE.Line(kiteLineGeo, inkMat));
+  const kiteG = kite(); kiteG.position.set(-28, 15, 13); world.add(kiteG);
+  const kiteLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-28, 15, 13), new THREE.Vector3(-23.5, 6, 7), new THREE.Vector3(-19.7, 1.25, 2.9)]);
+  const kiteLine = new THREE.Line(kiteLineGeo, inkMat); world.add(kiteLine);
+
+  /* ---------- 人 ---------- */
+  const people = [];
+  const add = (p, x, y, z, ry, show, act) => { p.position.set(x, y, z); p.rotation.y = ry; p.userData.base = new THREE.Vector3(x, y, z); p.userData.show = show; p.userData.act = act; world.add(p); people.push(p); return p; };
+  // 拂晓：扫街的大爷（胡同口）
+  const sweeper = add(person({ shirt: '#3f5f7a', hat: 'cap' }), 112, 0, -1.8, -Math.PI / 2 + .4, [4.5, 9], 'sweep');
+  const broom = new THREE.Group(); const bh = mesh(new THREE.CylinderGeometry(.02, .02, 1.4, 5), '#8a6a4c', { edges: false }); bh.position.y = -.4; broom.add(bh);
+  const bb = mesh(new THREE.ConeGeometry(.22, .45, 6), '#c9b077', { angle: 50 }); bb.position.y = -1.15; bb.rotation.x = Math.PI; broom.add(bb);
+  broom.position.set(0, -.55, .15); broom.rotation.x = .6; sweeper.userData.armR.add(broom);
+  // 拂晓：提笼遛鸟的人
+  const walker1 = add(person({ shirt: '#6b5a48', hat: 'cap' }), 104, 0, 1.6, -Math.PI / 2, [4.5, 10], 'walk');
+  walker1.userData.path = { x0: 118, x1: 60, speed: .9 };
+  const cage2 = new THREE.Group(); const cb = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, .3, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#5a4a3a', wireframe: true })); cage2.add(cb);
+  const cbt = mesh(new THREE.ConeGeometry(.17, .12, 10), '#8a6a4c', { edges: false }); cbt.position.y = .2; cage2.add(cbt); cage2.position.y = -.82; walker1.userData.armR.add(cage2);
+  // 早点摊：摊主 + 两位食客
+  const vendor = add(person({ shirt: '#efe6d2', pants: '#3b3a40' }), 95.2, 0, 5.7, 0, [5.2, 11], 'vendor');
+  const apron = mesh(new THREE.BoxGeometry(.34, .5, .04), '#b8322a', { edges: false }); apron.position.set(0, .2, .17); vendor.userData.body.add(apron);
+  [[97.6, 9.1, Math.PI + .3, '#5b6b7a'], [94.4, 9.3, Math.PI - .2, '#7a5a3e']].forEach(([x, z, r, c]) => {
+    const d = add(person({ shirt: c, hat: x > 96 ? 'cap' : null }), x, 0, z, r, [5.8, 10.5], 'eat'); sitPose(d, .5);
+  });
+  // 毛猴艺人（工作台后坐着）
+  const artisan = add(person({ shirt: '#4a5a6a', hat: null, hair: '#bdb6aa' }), 84, 0, -16.25, 0, [6, 12.5], 'craft'); sitPose(artisan, .55);
+  // 四合院：槐树下两位下棋的大爷 + 小桌
+  const chessT = new THREE.Group();
+  chessT.add(box(.9, .06, .9, '#8a6a4c', 0, .68, 0)); chessT.add(box(.12, .68, .12, '#6d5d4e'));
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(.7, .7), new THREE.MeshBasicMaterial({ color: '#e8d9b0' })); board.rotation.x = -Math.PI / 2; board.position.y = .745; chessT.add(board);
+  for (let i = 0; i < 10; i++) { const pc = new THREE.Mesh(new THREE.CylinderGeometry(.035, .035, .025, 10), M(i % 2 ? '#b8322a' : '#2b2724')); pc.position.set(-.28 + Math.random() * .56, .76, -.28 + Math.random() * .56); chessT.add(pc); }
+  chessT.position.set(-1.5, 0, -16.5); world.add(chessT);
+  const ch1 = add(person({ shirt: '#f2ede2', hair: '#cfc8bc' }), -2.4, 0, -16.5, Math.PI / 2, [10, 16.5], 'chess'); sitPose(ch1, .45);
+  const ch2 = add(person({ shirt: '#4f6d8a', hat: 'cap', hair: '#cfc8bc' }), -.6, 0, -16.5, -Math.PI / 2, [10, 16.5], 'think'); sitPose(ch2, .45);
+  const kibitz = add(person({ shirt: '#8a7a64', hair: '#9a9488' }), -1.4, 0, -17.6, 0, [10, 16.5], 'watch');
+  // 放风筝的孩子（胡同里）
+  const kid = add(person({ shirt: '#c23a2b', pants: '#2f5d8a', h: 1.15, kid: true }), -19.6, 0, 2.6, -.68, [12.5, 18], 'kite');
+  // 戏楼：台上两位演员 + 台下观众
+  add(person({ shirt: '#b8322a', robe: true, hat: 'opera' }), -91.5, 1.8, 11.6, 0, [16.5, 22], 'actor');
+  add(person({ shirt: '#2f5d8a', robe: true, hat: 'opera' }), -88.3, 1.8, 11.2, Math.PI * .15, [16.5, 22], 'actor2');
+  [[-94, 5.5], [-92.2, 5.2], [-90.2, 5.6], [-88.3, 5.1], [-93.2, 3.6], [-89.4, 3.5], [-91.2, 3.8]].forEach(([x, z], i) => {
+    const a = add(person({ shirt: ['#5b6b7a', '#7a5a3e', '#3f5f7a', '#6b5a48', '#8a7a64', '#4a5a6a', '#9b3b2e'][i], hat: i % 3 ? null : 'cap' }), x, 0, z, 0, [17, 22], 'audience'); sitPose(a, .45);
+  });
+  // 后台：对镜勾脸的演员
+  const makeup = add(person({ shirt: '#f4ece0', hair: '#2b2724' }), -103.4, 0, 12.4, Math.PI * .88, [18, 22.5], 'makeup'); sitPose(makeup, .5);
+  // 深夜：提灯回家的人
+  const night1 = add(person({ shirt: '#2f3440', hat: 'cap' }), 0, 0, -1.2, Math.PI / 2, [20.2, 25], 'walk');
+  night1.userData.path = { x0: -60, x1: 40, speed: .8, dir: 1 };
+  const nl = new THREE.Mesh(new THREE.SphereGeometry(.13, 10, 8), lanternMat); nl.position.y = -.75; night1.userData.armR.add(nl);
+  const nlight = new THREE.PointLight('#ffb766', 0, 14, 1.6); nl.add(nlight); night1.userData.light = nlight;
+  // 白天：骑车穿过胡同的人
+  const rider = add(person({ shirt: '#efe6d2', pants: '#2f5d8a' }), 50, .25, 1.4, -Math.PI / 2, [7.5, 17.5], 'ride');
+  rider.userData.path = { x0: 120, x1: -110, speed: 3.2 };
+  const rb = new THREE.Group(); const wm = M('#2f2b26');
+  [-.6, .6].forEach(dz => { const w = new THREE.Mesh(new THREE.TorusGeometry(.33, .03, 6, 16), wm); w.rotation.y = Math.PI / 2; w.position.set(0, -.25 + .08, dz); rb.add(w); });
+  const fr = new THREE.Mesh(new THREE.BoxGeometry(.05, .05, 1.2), wm); fr.position.y = .25; rb.add(fr);
+  rb.position.y = -.25; rider.add(rb); rider.userData.legL.rotation.x = -1.1; rider.userData.legR.rotation.x = -.7;
+  rider.userData.armL.rotation.x = rider.userData.armR.rotation.x = -1.0; rider.userData.body.rotation.x = .25;
+
+  function updatePeople(now, h) {
+    const t = now / 1000;
+    people.forEach(p => {
+      const u = p.userData, [a, b] = u.show;
+      const vis = h >= a && h <= b; p.visible = vis; if (!vis) return;
+      switch (u.act) {
+        case 'sweep': u.armR.rotation.x = -.6 + Math.sin(t * 2.4) * .45; u.armL.rotation.x = -.5 + Math.sin(t * 2.4) * .4; u.body.rotation.x = .25; u.body.rotation.y = Math.sin(t * 2.4) * .25; break;
+        case 'walk': case 'ride': {
+          const P = u.path, span = Math.abs(P.x1 - P.x0), dir = P.x1 > P.x0 ? 1 : -1;
+          const d = (t * P.speed) % span; p.position.x = P.x0 + dir * d; p.rotation.y = dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          if (u.act === 'walk') { const s = Math.sin(t * P.speed * 5); u.legL.rotation.x = s * .5; u.legR.rotation.x = -s * .5; u.armL.rotation.x = -s * .35; u.armR.rotation.x = s * .12 - .05; p.position.y = Math.abs(Math.cos(t * P.speed * 5)) * .03; }
+          else { const s = t * 6; u.legL.rotation.x = -1.1 + Math.sin(s) * .45; u.legR.rotation.x = -1.1 - Math.sin(s) * .45; }
+          if (u.light) u.light.intensity = h > 20 ? 18 : 0;
+          break; }
+        case 'vendor': { const c = (t % 6) / 6; const lift = c < .3 ? Math.sin(c / .3 * Math.PI) : 0;
+          u.armL.rotation.x = -lift * 1.9; u.armR.rotation.x = -.6; u.head.rotation.y = Math.sin(t * .7) * .3;
+          if (stall.userData.lid) { stall.userData.lid.position.y = 2.25 + lift * .55; stall.userData.lid.rotation.z = lift * .35; }
+          break; }
+        case 'eat': u.armR.rotation.x = -1.2 + Math.max(0, Math.sin(t * 1.6 + p.position.x)) * -.5; u.head.rotation.x = .2 + Math.sin(t * 1.6 + p.position.x) * .08; break;
+        case 'craft': u.armL.rotation.x = -1.05 + Math.sin(t * 3) * .08; u.armR.rotation.x = -1.1 + Math.sin(t * 3 + 1) * .1; u.armL.rotation.z = .35; u.armR.rotation.z = -.35; u.head.rotation.x = .45; break;
+        case 'chess': { const c = (t % 7) / 7; const r = c > .7 ? Math.sin((c - .7) / .3 * Math.PI) : 0; u.armR.rotation.x = -.7 - r * .7; u.armL.rotation.x = -.5; u.head.rotation.x = .35; break; }
+        case 'think': u.armL.rotation.x = -2.2; u.armL.rotation.z = .5; u.armR.rotation.x = -.5; u.head.rotation.x = .3 + Math.sin(t * .8) * .06; break;
+        case 'watch': u.armL.rotation.z = .25; u.armR.rotation.z = -.25; u.armL.rotation.x = u.armR.rotation.x = .25; u.body.rotation.x = .18; u.head.rotation.x = .35; break;
+        case 'kite': { u.armL.rotation.x = -2.0 + Math.sin(t * 1.8) * .15; u.armR.rotation.x = -1.7 + Math.sin(t * 1.8) * .2; u.head.rotation.x = -.55; p.position.y = Math.max(0, Math.sin(t * 3.2)) * .04;
+          const pos = kiteLine.geometry.attributes.position; pos.setXYZ(0, kiteG.position.x, kiteG.position.y - .6, kiteG.position.z); pos.needsUpdate = true; break; }
+        case 'actor': case 'actor2': { const ph = u.act === 'actor' ? 0 : 2; u.armL.rotation.z = .9 + Math.sin(t * .9 + ph) * .5; u.armR.rotation.z = -.9 - Math.sin(t * .9 + ph + 1) * .5; u.armL.rotation.x = -.4; p.rotation.y = Math.PI + (u.act === 'actor' ? .25 : -.35) + Math.sin(t * .45 + ph) * .6; break; }
+        case 'audience': u.head.rotation.y = Math.sin(t * .5 + p.position.x) * .15; u.armL.rotation.x = u.armR.rotation.x = -.9; break;
+        case 'makeup': u.armR.rotation.x = -2.1 + Math.sin(t * 2.5) * .1; u.armR.rotation.z = -.4; u.armL.rotation.x = -.8; u.head.rotation.x = -.05; break;
+      }
+    });
+  }
+
 
   // 鸽群
   const pigeons = [];
@@ -504,7 +640,7 @@ export function initScene(canvas) {
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
   const anchors = {
     breakfast: V(95, 2.6, 7), store: V(108, 4.4, -4), maohou: V(84, 1.6, -15), yard: V(1.5, 4.2, -14),
-    kite: V(-30, 22.5, 14), pigeon: V(40, 27, 0), opera: V(-90, 8, 9), mask: V(-104, 3, 12), gate: V(-20.6, 2.2, -2)
+    kite: V(-28, 15.5, 13), pigeon: V(40, 27, 0), opera: V(-90, 8, 9), mask: V(-104, 3, 12), gate: V(-20.6, 2.2, -2)
   };
 
   /* ---------- 更新 ---------- */
@@ -538,19 +674,20 @@ export function initScene(canvas) {
     const st = clamp((h - 5) / 14);
     const sunDir = h < 19.4 ? V(Math.cos(st * Math.PI) * 200, Math.sin(st * Math.PI) * 150 + 15, 110) : V(-90, 160, 80);
     sun.position.copy(tmpT).add(sunDir); sun.target.position.copy(tmpT);
-    // 墨线：白天深色，夜里反白（像原图反相）
-    inkMat.color.set('#3a342c').lerp(C('#d9d1bd'), L.night);
+    // 墨线：始终是深色墨线，夜里转为深靛
+    inkMat.color.set('#3a342c').lerp(C('#0b0d14'), L.night); inkMat.opacity = .85 - L.night * .25;
     if (Math.abs(L.night - lastNight) > .01) {
       lastNight = L.night;
       Object.entries(matCache).forEach(([hex, m]) => m.color.set(hex).lerp(C('#1d2333'), L.night * .55));
     }
     lanternMat.emissiveIntensity = L.lamp * 2.2;
-    windowMat.emissiveIntensity = L.lamp * 1.4;
+    windowMat.emissiveIntensity = L.lamp * 2.4;
     pls.forEach(l => l.intensity = L.lamp * 40);
 
+    updatePeople(now, h);
     // 动画：风筝、鸽子、蒸汽
     kiteG.rotation.z = Math.sin(now / 900) * .12; kiteG.rotation.y = Math.PI + Math.sin(now / 1300) * .25;
-    kiteG.position.y = 22 + Math.sin(now / 1100) * .6;
+    kiteG.position.y = 15 + Math.sin(now / 1100) * .6;
     const day = h > 5.6 && h < 18.5;
     pigeons.forEach(p => {
       const u = p.userData, a = u.a + now / 5200;
