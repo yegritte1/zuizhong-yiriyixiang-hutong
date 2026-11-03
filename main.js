@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { initMaohou, initKite, initMask } from './games.js';
 import { updateAmbient, setSound, soundOn, soundPref } from './audio.js';
+import { openBreakfast } from './life.js';
 /* 一日一巷 · 胡同里的时间遗产
  * 一张胡同图，滚动 = 时间流逝；镜头沿胡同由东（晨）向西（夜）飞行，换光不换图。
  */
@@ -30,7 +31,7 @@ const N = STOPS.length;
 
 /* ---------------- 热点 ---------------- */
 const SPOTS = [
-  { id: 'breakfast', x: .78, y: .63, from: 5, to: 11, label: '早点摊', img: 'breakfast',
+  { id: 'breakfast', x: .78, y: .63, from: 5, to: 11, label: '早点摊 · 挑份早饭', img: 'breakfast', life: 'breakfast',
     kicker: '清晨 · 06:45', title: '早点摊',
     text: ['天还没亮透，胡同口的蒸笼已经冒气了。豆汁儿、焦圈、炸油条、糖葫芦——北京人的一天，从一碗热乎的开始。',
            '<span class="tag">豆汁儿</span><span class="tag">焦圈</span><span class="tag">糖葫芦</span><span class="tag">吆喝声</span>'] },
@@ -258,8 +259,10 @@ function spawnBirds() {
 
 /* ---------------- 面板 ---------------- */
 const collected = new Set();
+const lifeSeals = new Set();   // 胡同小印（生活场景）
 function openSpot(s) {
   if (s.finale) return openFinale();
+  if (s.life === 'breakfast') return openBreakfast({ sealed: () => lifeSeals.has('早'), onSeal: () => { lifeSeals.add('早'); } });
   $('#panelKicker').textContent = s.kicker;
   $('#panelTitle').textContent = s.title;
   $('#panelText').innerHTML = s.text.map(t => `<p>${t}</p>`).join('');
@@ -344,7 +347,8 @@ function openFinale() {
   const d = new Date();
   $('#plateDate').textContent = `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 · 一日一巷`;
   $('#plateSeals').innerHTML = [['maohou', '猴'], ['kite', '鸢'], ['mask', '谱']]
-    .map(([k, c]) => `<span class="${collected.has(k) ? '' : 'off'}">${c}</span>`).join('');
+    .map(([k, c]) => `<span class="${collected.has(k) ? '' : 'off'}">${c}</span>`).join('')
+    + [...lifeSeals].map(c => `<span class="life-seal">${c}</span>`).join('');
   $('#finaleText').innerHTML = n === 3
     ? '清晨的毛猴、午后的沙燕、入夜的脸谱，<br/>都留在了这块门牌上。这条胡同，记住了你。'
     : `你收集了 ${n} / 3 枚非遗印记。<br/>胡同还在，明天再来，把剩下的手艺找回来。`;
@@ -427,4 +431,5 @@ buildStars();
 window.__hutong = { jump: v => { target = prog = v; } };
 requestAnimationFrame(frame);
 setTimeout(spawnBirds, 4000);
+window.__openSpot = id => openSpot(SPOTS.find(s => s.id === id));
 })();
