@@ -281,11 +281,14 @@ function openSpot(s) {
     if (s.game === 'maohou') {
       g.textContent = '▶ 《百年毛猴》· 看完动手捏';
       g.onclick = () => { closePanel(); openVideo('maohou', () => openGame('maohou')); };
+    } else if (s.game === 'kite') {
+      g.textContent = '▶ 《沙燕风筝》· 看完动手绘';
+      g.onclick = () => { closePanel(); openVideo('kite', () => openGame('kite')); };
     } else {
       g.onclick = () => { closePanel(); openGame(s.game); };
     }
     act.appendChild(g);
-    if (s.game === 'maohou') {
+    if (s.game === 'maohou' || s.game === 'kite') {
       const v = document.createElement('button'); v.className = 'btn ghost';
       v.textContent = '跳过短片，直接动手';
       v.onclick = () => { closePanel(); openGame(s.game); };
@@ -439,6 +442,12 @@ const VIDEOS = {
     badge: '非遗短片', title: '《百年毛猴》', dur: '40 秒',
     sub: '用几味中药，拼出一只猴。蝉蜕做头和四肢，辛夷做身子——老北京的手艺，留了下来。',
     cta: '轮到你来捏一只', skip: '跳过，直接动手'
+  },
+  kite: {
+    src: './video/v3_kite.mp4', poster: './video/v3_kite_poster.jpg',
+    badge: '非遗短片', title: '《沙燕风筝》', dur: '40 秒',
+    sub: '扎、糊、绘、放——把纸变成一只燕，让它飞上胡同的天空。',
+    cta: '轮到你来绘一只', skip: '跳过，直接动手'
   }
 };
 let vidOnDone = null, vidCurrent = null;
