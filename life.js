@@ -14,34 +14,44 @@ const NS = 'http://www.w3.org/2000/svg';
 const rnd = (a, b) => a + Math.random() * (b - a);
 
 /* ---------------- 小音效（全部正弦/三角波，干净不刺耳） ---------------- */
-let AC = null;
-function ac() { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); return AC; }
+let AC = null, BUS = null;
+function ac() {
+  if (!AC) {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; lp.Q.value = .5;
+    const comp = AC.createDynamicsCompressor(); comp.threshold.value = -20; comp.ratio.value = 4;
+    const g = AC.createGain(); g.gain.value = .8;
+    lp.connect(comp); comp.connect(g); g.connect(AC.destination); BUS = lp;
+  }
+  if (AC.state === 'suspended') AC.resume(); return AC;
+}
 function tone(f0, f1, dur, vol = .12, type = 'sine', delay = 0) {
   const a = ac(), t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+  f0 = Math.min(f0, 2200); f1 = Math.min(f1, 2200);
   o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
-  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(.0008, t + dur);
-  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur + .02);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .025); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
+  o.connect(g); g.connect(BUS); o.start(t); o.stop(t + dur + .05);
 }
 export function sfx(type) {
   if (!soundOn()) return;
   try {
     switch (type) {
-      case 'pop': tone(520, 990, .16, .14); break;
-      case 'drop': tone(330, 180, .16, .14); break;
-      case 'bubble': for (let i = 0; i < 5; i++) tone(rnd(700, 1300), rnd(1400, 2000), .07, .05, 'sine', i * .07); break;
-      case 'fry': for (let i = 0; i < 7; i++) tone(rnd(1800, 2600), rnd(1200, 1600), .04, .025, 'sine', i * .06); break;
-      case 'steam': tone(420, 260, .5, .05, 'triangle'); break;
-      case 'stamp': tone(150, 60, .3, .3, 'triangle'); break;
-      case 'bell': [1, 2.76, 5.4].forEach((r, i) => tone(1500 * r, 1500 * r * .995, 1.1 / (i + 1), .07 / (i + 1))); tone(1500, 1495, .9, .06, 'sine', .18); break;
-      case 'chirp': for (let i = 0; i < 3; i++) tone(rnd(2600, 3200), rnd(3600, 4200), .08, .05, 'sine', i * .13); break;
-      case 'clack': tone(900, 600, .06, .16, 'triangle'); tone(700, 500, .05, .1, 'triangle', .07); break;
+      case 'pop': tone(440, 880, .16, .1); break;
+      case 'drop': tone(330, 200, .18, .1); break;
+      case 'bubble': for (let i = 0; i < 4; i++) tone(rnd(500, 800), rnd(900, 1200), .09, .045, 'sine', i * .09); break;
+      case 'fry': for (let i = 0; i < 4; i++) tone(rnd(600, 900), rnd(500, 700), .08, .03, 'sine', i * .1); break;
+      case 'steam': tone(392, 330, .5, .04); break;
+      case 'stamp': tone(160, 80, .35, .22); tone(523, 523, .6, .04, 'sine', .12); break;
+      case 'bell': [[784, .9], [1175, .7], [1568, .5]].forEach(([f, d], i) => tone(f, f * .998, d, .06 / (i + 1), 'sine', i * .12)); break;
+      case 'chirp': for (let i = 0; i < 3; i++) tone(rnd(1300, 1600), rnd(1700, 2000), .1, .035, 'sine', i * .15); break;
+      case 'clack': tone(620, 440, .08, .1, 'sine'); tone(520, 380, .07, .07, 'sine', .08); break;
       case 'gong': [1, 1.48, 2.1].forEach((r, i) => tone(200 * r, 170 * r, 1.6 / (i + 1), .14 / (i + 1))); break;
       case 'xiao': tone(880, 1320, .25, .08); tone(1320, 1760, .2, .06, 'sine', .2); break;
-      case 'coin': tone(1900, 2100, .12, .07); tone(2500, 2600, .18, .06, 'sine', .08); break;
-      case 'bead': tone(1200, 1000, .04, .08, 'triangle'); break;
+      case 'coin': tone(1047, 1050, .25, .06); tone(1568, 1570, .35, .05, 'sine', .1); break;
+      case 'bead': tone(700, 560, .07, .07, 'sine'); break;
       case 'whistle': [784, 880, 1047, 1175].forEach((f, i) => tone(f, f * .998, .7, .045, 'sine', i * .11)); break; // 柔和风铃，代替鸽哨（原 FM 音听感刺耳）
-      case 'meow': tone(700, 1000, .18, .05, 'triangle'); tone(1000, 600, .3, .05, 'triangle', .18); break;
-      case 'hao': tone(300, 420, .3, .09, 'triangle'); break;
+      case 'meow': tone(600, 880, .2, .05); tone(880, 520, .35, .05, 'sine', .2); break;
+      case 'hao': tone(300, 420, .3, .08); break;
     }
   } catch (e) {}
 }
@@ -93,7 +103,60 @@ function shell({ kicker, title, svg, hint, goText, bubbleAt = [800, 200], cls = 
   const onKey = e => { if (e.key === 'Escape') S.close(); };
   addEventListener('keydown', onKey);
   root.querySelector('.lf-back').onclick = () => S.close();
+  polish(S);
   return S;
+}
+/* ---------------- 统一“精修层”：纸纹、光、阴影、入场、点击手感 ---------------- */
+let GRAIN = null;
+function grainURL() {
+  if (GRAIN) return GRAIN;
+  const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'), d = x.createImageData(256, 256);
+  for (let i = 0; i < d.data.length; i += 4) { const v = 200 + Math.random() * 55; d.data[i] = v; d.data[i + 1] = v * .97; d.data[i + 2] = v * .9; d.data[i + 3] = Math.random() * 40; }
+  x.putImageData(d, 0, 0);
+  // 几道纤维
+  x.strokeStyle = 'rgba(120,90,50,.06)'; for (let i = 0; i < 40; i++) { x.beginPath(); const a = Math.random() * 256, b = Math.random() * 256; x.moveTo(a, b); x.quadraticCurveTo(a + rnd(-30, 30), b + rnd(-30, 30), a + rnd(-60, 60), b + rnd(-60, 60)); x.stroke(); }
+  return (GRAIN = c.toDataURL());
+}
+function polish(S) {
+  const { root, svg } = S;
+  // SVG 滤镜：落地软阴影 + 悬停暖光描边
+  const defs = document.createElementNS(NS, 'defs');
+  defs.innerHTML = `
+    <filter id="lfSh" x="-20%" y="-20%" width="140%" height="150%"><feGaussianBlur in="SourceAlpha" stdDeviation="5"/><feOffset dx="3" dy="8"/>
+      <feComponentTransfer><feFuncA type="linear" slope=".22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="lfGlow" x="-20%" y="-20%" width="140%" height="140%"><feMorphology in="SourceAlpha" operator="dilate" radius="4" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="3" result="b"/><feFlood flood-color="#fff1c4"/><feComposite in2="b" operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="lfLight" cx="50%" cy="25%" r="75%"><stop offset="0" stop-color="#fff6dc" stop-opacity=".35"/><stop offset=".6" stop-color="#fff6dc" stop-opacity="0"/><stop offset="1" stop-color="#3a2a1a" stop-opacity=".22"/></radialGradient>`;
+  svg.prepend(defs);
+  svg.querySelectorAll('.lf-item').forEach(g => g.setAttribute('filter', 'url(#lfSh)'));
+  // 光与暗角（在 SVG 里，跟着画面缩放）
+  const light = document.createElementNS(NS, 'rect');
+  Object.entries({ width: 1600, height: 900, fill: 'url(#lfLight)', class: 'lf-light', 'pointer-events': 'none' }).forEach(([k, v]) => light.setAttribute(k, v));
+  svg.appendChild(light);
+  // 纸纹 + 漂浮的光尘
+  const grain = el('div', 'lf-grain'); grain.style.backgroundImage = `url(${grainURL()})`; root.querySelector('.lf-wrap').appendChild(grain);
+  const motes = el('div', 'lf-motes', Array.from({ length: 18 }, () => `<i style="left:${rnd(5, 95)}%;top:${rnd(10, 80)}%;animation-delay:${rnd(-12, 0)}s;animation-duration:${rnd(9, 16)}s;--s:${rnd(.5, 1.2)}"></i>`).join(''));
+  root.querySelector('.lf-wrap').appendChild(motes);
+  // 鼠标视差：画面跟着手轻轻移动
+  const wrap = root.querySelector('.lf-wrap'); let px = 0, py = 0, tx = 0, ty = 0, raf = 0, alive = true;
+  root.addEventListener('mousemove', e => { tx = (e.clientX / innerWidth - .5) * -8; ty = (e.clientY / innerHeight - .5) * -5; });
+  const tick = () => { if (!alive) return; px += (tx - px) * .06; py += (ty - py) * .06; svg.style.transform = `translate(${px}px,${py}px) scale(1.02)`; raf = requestAnimationFrame(tick); };
+  raf = requestAnimationFrame(tick);
+  const prevClose = S.close; S.close = () => { alive = false; cancelAnimationFrame(raf); prevClose(); };
+  // 入场：东西一件件“落”到位
+  [...svg.querySelectorAll('.lf-item')].forEach((g, i) => g.animate([{ opacity: 0, translate: '0 26px' }, { opacity: 1, translate: '0 -4px', offset: .7 }, { opacity: 1, translate: '0 0' }],
+    { duration: 700, delay: 350 + i * 70, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'backwards' }));
+  // 点击手感：压一下再弹回来 + 一圈金色小光点
+  svg.addEventListener('pointerdown', e => {
+    const g = e.target.closest('.lf-item, .yd-fu, .pg-man'); if (!g) return;
+    g.animate([{ scale: '1' }, { scale: '1.04 .95', offset: .25 }, { scale: '.98 1.03', offset: .6 }, { scale: '1' }], { duration: 420, easing: 'ease-out', composite: 'add' });
+    burst(e.clientX, e.clientY);
+  });
+}
+function burst(x, y) {
+  const b = el('div', 'lf-burst'); b.style.left = x + 'px'; b.style.top = y + 'px';
+  b.innerHTML = Array.from({ length: 9 }, (_, i) => `<i style="--a:${i * 40 + rnd(-8, 8)}deg;--d:${rnd(26, 46)}px"></i>`).join('');
+  document.body.appendChild(b); setTimeout(() => b.remove(), 700);
 }
 // 一个东西沿弧线飞到目标
 function flyIcon(html, sx, sy, tx, ty, size, done) {
@@ -776,10 +839,30 @@ function operaSVG() {
   ${[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => `<circle cx="${200 + i * 100}" cy="178" r="8" fill="#c23a2b" stroke="${INK}" stroke-width="2"/>`).join('')}
   <g transform="translate(800 120)"><rect x="-120" y="-36" width="240" height="64" rx="8" fill="#2b2724" stroke="#c9a227" stroke-width="5"/>
     <text x="0" y="12" text-anchor="middle" font-size="40" fill="#e0ad3a" font-family="YRTitle,serif" letter-spacing="10">出将入相</text></g>
-  <rect x="200" y="196" width="40" height="520" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
-  <rect x="1360" y="196" width="40" height="520" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
-  <!-- 台板 -->
+  ${[200, 1360].map(x => `<rect x="${x}" y="196" width="40" height="520" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+    <rect x="${x + 8}" y="230" width="24" height="380" fill="#2b2724" stroke="#c9a227" stroke-width="2"/>
+    ${[0, 1, 2, 3, 4, 5, 6].map(i => `<path d="M${x + 14} ${256 + i * 50} h12 M${x + 20} ${248 + i * 50} v16" stroke="#e0ad3a" stroke-width="3"/>`).join('')}
+    <path d="M${x - 6} 690 H${x + 46} V716 H${x - 6} Z" fill="#8a8580" stroke="${INK}" stroke-width="4"/>`).join('')}
+  <!-- 台板 + 红氍毹 -->
   <path d="M120 700 H1480 L1520 760 H80 Z" fill="#7a4e2e" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+  ${Array.from({ length: 14 }, (_, i) => `<path d="M${160 + i * 100} 700 L${130 + i * 104} 760" stroke="#5e3b22" stroke-width="2"/>`).join('')}
+  <path d="M380 700 H1220 L1250 744 H350 Z" fill="#a8322a" stroke="${INK}" stroke-width="4"/>
+  <path d="M400 708 H1200 M370 736 H1230" stroke="#e0ad3a" stroke-width="3" stroke-dasharray="18 8"/>
+  <g class="yd-lt xl-lt1" transform="translate(140 200)"><path d="M0 -40 V0" stroke="#3a2a1e" stroke-width="3"/>
+    <rect x="-14" y="0" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <ellipse cx="0" cy="40" rx="34" ry="40" fill="#d0432f" stroke="${INK}" stroke-width="4"/>
+    <path d="M0 6 V74 M-22 14 Q-34 40 -22 66 M22 14 Q34 40 22 66" fill="none" stroke="#9e2a1e" stroke-width="2.5"/>
+    <ellipse cx="-10" cy="28" rx="7" ry="12" fill="#fff" opacity=".25"/>
+    <rect x="-14" y="72" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <path class="lt-tassel" d="M0 80 V112 M-6 80 L-8 108 M6 80 L8 108" stroke="#e0ad3a" stroke-width="3" stroke-linecap="round"/></g>
+  <g class="yd-lt xl-lt2" transform="translate(1460 200)"><path d="M0 -40 V0" stroke="#3a2a1e" stroke-width="3"/>
+    <rect x="-14" y="0" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <ellipse cx="0" cy="40" rx="34" ry="34" fill="#d0432f" stroke="${INK}" stroke-width="4"/>
+    <path d="M0 6 V74 M-22 14 Q-34 40 -22 66 M22 14 Q34 40 22 66" fill="none" stroke="#9e2a1e" stroke-width="2.5"/>
+    <ellipse cx="-10" cy="28" rx="7" ry="12" fill="#fff" opacity=".25"/>
+    <rect x="-14" y="72" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <path class="lt-tassel" d="M0 80 V112 M-6 80 L-8 108 M6 80 L8 108" stroke="#e0ad3a" stroke-width="3" stroke-linecap="round"/></g>
+  <circle cx="140" cy="240" r="90" fill="#ffb060" opacity=".14" class="xl-lglow"/><circle cx="1460" cy="240" r="90" fill="#ffb060" opacity=".14" class="xl-lglow"/>
   <!-- 舞台后墙 + 灯 -->
   <rect x="240" y="196" width="1120" height="504" fill="#5a3a2e"/>
   <ellipse class="xl-spot" cx="800" cy="470" rx="420" ry="300" fill="url(#xlSpot)"/>
@@ -809,10 +892,19 @@ function operaSVG() {
   <!-- 幕布（左右两扇，点了拉开） -->
   <g class="xl-curtain lf-item" data-k="curtain" data-tip="幕布|点一下，开锣">
     <g class="xl-cl"><path d="M240 196 H810 V700 H240 Z" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+      <path d="M240 660 H810" stroke="#e0ad3a" stroke-width="10"/><path d="M240 676 H810" stroke="#e0ad3a" stroke-width="3"/>
+      <g transform="translate(525 430)"><circle r="78" fill="none" stroke="#e0ad3a" stroke-width="5"/><circle r="62" fill="none" stroke="#e0ad3a" stroke-width="2"/>
+        ${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<path d="M0 -58 q14 22 0 40 q-14 -18 0 -40z" fill="#e0ad3a" transform="rotate(${i * 45})"/>`).join('')}<circle r="10" fill="#e0ad3a"/></g>
       ${[300,380,460,540,620,700,780].map(x => `<path d="M${x} 196 Q${x + 18} 450 ${x} 700" fill="none" stroke="#7d2219" stroke-width="5"/>`).join('')}</g>
     <g class="xl-cr"><path d="M790 196 H1360 V700 H790 Z" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+      <path d="M790 660 H1360" stroke="#e0ad3a" stroke-width="10"/><path d="M790 676 H1360" stroke="#e0ad3a" stroke-width="3"/>
+      <g transform="translate(1075 430)"><circle r="78" fill="none" stroke="#e0ad3a" stroke-width="5"/><circle r="62" fill="none" stroke="#e0ad3a" stroke-width="2"/>
+        ${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<path d="M0 -58 q14 22 0 40 q-14 -18 0 -40z" fill="#e0ad3a" transform="rotate(${i * 45})"/>`).join('')}<circle r="10" fill="#e0ad3a"/></g>
       ${[840,920,1000,1080,1160,1240,1320].map(x => `<path d="M${x} 196 Q${x + 18} 450 ${x} 700" fill="none" stroke="#7d2219" stroke-width="5"/>`).join('')}</g>
   </g>
+  <!-- 顶上帷幔 + 流苏 -->
+  <path d="M240 196 H1360 V226 ${Array.from({ length: 14 }, (_, i) => `Q${1340 - i * 80} 266 ${1280 - i * 80} 226`).join(' ')} Q260 266 240 226 Z" fill="#7d2219" stroke="${INK}" stroke-width="4"/>
+  ${Array.from({ length: 15 }, (_, i) => `<path class="xl-tas" d="M${240 + i * 80} 228 V256" stroke="#e0ad3a" stroke-width="4" stroke-linecap="round"/><circle cx="${240 + i * 80}" cy="260" r="5" fill="#e0ad3a"/>`).join('')}
   <!-- 台口乐队：锣、鼓、京胡 -->
   <g class="lf-item xl-gong" data-k="gong" transform="translate(150 640)" data-tip="大锣|“哐——”">
     <path d="M0 -150 V-90" stroke="#6b4428" stroke-width="6"/><circle cx="0" cy="-50" r="46" fill="#c9a227" stroke="${INK}" stroke-width="5"/><circle cx="0" cy="-50" r="16" fill="#e0ad3a" stroke="${INK}" stroke-width="3"/>
@@ -929,7 +1021,7 @@ export function openOpera({ onSeal, sealed }) {
 }
 
 /* ================= ④ 四合院 · 找福 ================= */
-const fuMark = (s = 1, rot = 0) => `<g transform="rotate(${rot}) scale(${s})"><rect x="-30" y="-30" width="60" height="60" rx="4" transform="rotate(45)" fill="#c23a2b" stroke="${INK}" stroke-width="4"/>
+const fuMark = (s = 1, rot = 0) => `<g transform="rotate(${rot}) scale(${s})"><circle r="70" fill="rgba(0,0,0,0)"/><rect x="-30" y="-30" width="60" height="60" rx="4" transform="rotate(45)" fill="#c23a2b" stroke="${INK}" stroke-width="4"/>
   <text y="15" text-anchor="middle" font-size="42" fill="#f3d27a" font-family="YRTitle,serif" transform="rotate(180)">福</text></g>`;
 function yardSVG() {
   const tiles = n => Array.from({ length: n }, (_, i) => `<path d="M${i * 46} 0 q23 -16 46 0" fill="none" stroke="${INK}" stroke-width="3"/>`).join('');
@@ -937,22 +1029,76 @@ function yardSVG() {
 <svg class="lf-stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
   <rect width="1600" height="900" fill="#cfe0e6"/>
   <rect y="560" width="1600" height="340" fill="#d8ccb2"/>
+  <defs>
+    <pattern id="ydLat" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="#f2e6c9"/>
+      <path d="M0 15 H10 V5 H20 V15 H30 M15 0 V5 M15 30 V20 H5 M25 20 V30" fill="none" stroke="#8a3a2e" stroke-width="2.4"/></pattern>
+    <linearGradient id="ydSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9d4de"/><stop offset="1" stop-color="#e8eee6"/></linearGradient>
+    <linearGradient id="ydBeam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffbe8" stop-opacity=".5"/><stop offset="1" stop-color="#fffbe8" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="1600" height="560" fill="url(#ydSky)"/>
+  <g opacity=".55">${[[260, 90, 70], [1240, 70, 90], [1500, 130, 50]].map(([x, y, r]) => `<g transform="translate(${x} ${y})"><ellipse rx="${r}" ry="${r * .32}" fill="#fff"/><ellipse cx="${r * .5}" cy="-8" rx="${r * .6}" ry="${r * .3}" fill="#fff"/></g>`).join('')}</g>
+  <rect y="560" width="1600" height="340" fill="#d8ccb2"/>
   ${Array.from({ length: 12 }, (_, i) => `<path d="M0 ${600 + i * 26} H1600" stroke="#c4b796" stroke-width="2"/>`).join('')}
+  ${Array.from({ length: 23 }, (_, i) => `<path d="M${800 + (i - 11) * 40} 560 L${800 + (i - 11) * 150} 900" stroke="#c4b796" stroke-width="2"/>`).join('')}
+  <!-- 墙头远景：邻院屋脊、槐树梢 -->
+  <g opacity=".6"><path d="M0 250 H260 L300 220 H1300 L1340 250 H1600 V560 H0 Z" fill="#a9a59a"/>
+    ${Array.from({ length: 36 }, (_, i) => `<path d="M${i * 46} 250 q23 -12 46 0" fill="none" stroke="#7f7b72" stroke-width="2"/>`).join('')}
+    <circle cx="1480" cy="200" r="70" fill="#7fa286"/><circle cx="1400" cy="225" r="50" fill="#7fa286"/><circle cx="90" cy="215" r="60" fill="#7fa286"/></g>
+  <rect y="250" width="1600" height="310" fill="#b8b0a0" opacity=".55"/>
   <!-- 正房（北） -->
   <g transform="translate(400 210)">
     <path d="M-40 40 L60 -40 H740 L840 40 Z" fill="#5d6466" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
-    <g transform="translate(0 30)">${tiles(18)}</g>
+    ${Array.from({ length: 34 }, (_, i) => `<path d="M${70 + i * 20} -36 L${-24 + i * 25.6} 38" stroke="#474d4f" stroke-width="5" stroke-linecap="round"/>`).join('')}
+    <rect x="50" y="-56" width="700" height="20" rx="4" fill="#4a5052" stroke="${INK}" stroke-width="5"/>
+    <path d="M50 -56 q-30 -30 -14 -50 q14 10 24 30 M750 -56 q30 -30 14 -50 q-14 10 -24 30" fill="#4a5052" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
+    <g transform="translate(0 30)">${Array.from({ length: 18 }, (_, i) => `<path d="M${i * 46} 0 q23 -16 46 0" fill="#6a7173" stroke="${INK}" stroke-width="3"/>`).join('')}</g>
+    ${Array.from({ length: 18 }, (_, i) => `<path d="M${i * 46 + 12} 40 l11 12 l11 -12" fill="#5d6466" stroke="${INK}" stroke-width="2.5"/>`).join('')}
     <rect x="0" y="40" width="800" height="320" fill="#b8473a" stroke="${INK}" stroke-width="6"/>
-    ${[0, 1, 2, 3].map(i => `<rect x="${40 + i * 190}" y="80" width="150" height="190" fill="#f2e6c9" stroke="${INK}" stroke-width="5"/>
-      <path d="M${40 + i * 190} 175 H${190 + i * 190} M${115 + i * 190} 80 V270" stroke="#8a3a2e" stroke-width="4"/>`).join('')}
+    <rect x="0" y="40" width="800" height="30" fill="#2b2724" opacity=".22"/>
+    <path d="M0 70 H800" stroke="#2f5d8a" stroke-width="8"/><path d="M0 78 H800" stroke="#c9a227" stroke-width="3"/>
+    ${[0, 1, 2, 3].map(i => `<rect x="${40 + i * 190}" y="96" width="150" height="174" fill="url(#ydLat)" stroke="${INK}" stroke-width="5"/>
+      <rect x="${40 + i * 190}" y="96" width="150" height="174" fill="#fff6dc" opacity=".25"/>
+      <path d="M${40 + i * 190} 183 H${190 + i * 190}" stroke="#8a3a2e" stroke-width="6"/>`).join('')}
+    ${[20, 210, 400, 590, 780].map(x => `<rect x="${x - 8}" y="80" width="16" height="280" fill="#9e3a2f"/>`).join('')}
     <rect x="0" y="300" width="800" height="60" fill="#8a3a2e" stroke="${INK}" stroke-width="5"/>
+    <path d="M0 300 H800" stroke="#c9a227" stroke-width="3"/>
+    <rect x="-20" y="356" width="840" height="18" fill="#a8a194" stroke="${INK}" stroke-width="4"/>
+    <!-- 楹联 -->
+    <rect x="201" y="104" width="18" height="150" fill="#c23a2b" stroke="${INK}" stroke-width="2"/>
+    <rect x="391" y="104" width="18" height="150" fill="#c23a2b" stroke="${INK}" stroke-width="2"/>
+    ${[0, 1, 2, 3, 4].map(i => `<circle cx="210" cy="${122 + i * 28}" r="4" fill="#e0ad3a"/><circle cx="400" cy="${122 + i * 28}" r="4" fill="#e0ad3a"/>`).join('')}
   </g>
+  <g class="yd-lt yd-lt1" transform="translate(470 250)"><path d="M0 -40 V0" stroke="#3a2a1e" stroke-width="3"/>
+    <rect x="-14" y="0" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <ellipse cx="0" cy="40" rx="34" ry="34" fill="#d0432f" stroke="${INK}" stroke-width="4"/>
+    <path d="M0 6 V74 M-22 14 Q-34 40 -22 66 M22 14 Q34 40 22 66" fill="none" stroke="#9e2a1e" stroke-width="2.5"/>
+    <ellipse cx="-10" cy="28" rx="7" ry="12" fill="#fff" opacity=".25"/>
+    <rect x="-14" y="72" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <path class="lt-tassel" d="M0 80 V112 M-6 80 L-8 108 M6 80 L8 108" stroke="#e0ad3a" stroke-width="3" stroke-linecap="round"/></g>
+  <g class="yd-lt yd-lt2" transform="translate(1130 250)"><path d="M0 -40 V0" stroke="#3a2a1e" stroke-width="3"/>
+    <rect x="-14" y="0" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <ellipse cx="0" cy="40" rx="34" ry="34" fill="#d0432f" stroke="${INK}" stroke-width="4"/>
+    <path d="M0 6 V74 M-22 14 Q-34 40 -22 66 M22 14 Q34 40 22 66" fill="none" stroke="#9e2a1e" stroke-width="2.5"/>
+    <ellipse cx="-10" cy="28" rx="7" ry="12" fill="#fff" opacity=".25"/>
+    <rect x="-14" y="72" width="28" height="8" rx="2" fill="#c9a227" stroke="${INK}" stroke-width="2"/>
+    <path class="lt-tassel" d="M0 80 V112 M-6 80 L-8 108 M6 80 L8 108" stroke="#e0ad3a" stroke-width="3" stroke-linecap="round"/></g>
+  <!-- 斜阳光束 -->
+  <g class="yd-beams" pointer-events="none">${[[300, 120], [520, 80], [760, 140]].map(([x, w]) => `<path d="M${x} 0 L${x + w} 0 L${x + w + 520} 900 L${x + 420} 900 Z" fill="url(#ydBeam)"/>`).join('')}</g>
+  <!-- 落地影子 -->
+  <g fill="#3a2a1a" opacity=".16" pointer-events="none"><ellipse cx="200" cy="646" rx="120" ry="16"/><ellipse cx="800" cy="806" rx="150" ry="18"/><ellipse cx="520" cy="842" rx="110" ry="12"/>
+    <ellipse cx="1080" cy="762" rx="96" ry="12"/><ellipse cx="1395" cy="858" rx="170" ry="12"/></g>
+  <!-- 花盆 -->
+  <g transform="translate(640 640)"><path d="M-34 0 H34 L26 46 H-26 Z" fill="#b5653a" stroke="${INK}" stroke-width="4"/>
+    <path d="M0 0 Q-30 -40 -20 -70 M0 0 Q10 -50 30 -66 M0 0 Q-4 -40 4 -86" fill="none" stroke="#4f8a5c" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="-20" cy="-72" r="9" fill="#e07a9a" stroke="${INK}" stroke-width="2"/><circle cx="30" cy="-68" r="8" fill="#e07a9a" stroke="${INK}" stroke-width="2"/><circle cx="4" cy="-88" r="9" fill="#e0ad3a" stroke="${INK}" stroke-width="2"/></g>
   <!-- 正房门上的福（倒贴） -->
   <g class="yd-fu yd-fu0" data-f="0" transform="translate(590 380)">${fuMark(.8)}</g>
   <!-- 石榴树（左） -->
   <g class="lf-item yd-tree" data-k="tree" transform="translate(200 640)" data-tip="石榴树|多子多福">
     <path d="M-14 0 Q-20 -160 0 -260 M0 -200 Q60 -240 90 -300 M0 -220 Q-60 -260 -90 -310" fill="none" stroke="#6b4428" stroke-width="22" stroke-linecap="round"/>
-    <g class="yd-leaves">${[[-90, -330, 90], [0, -380, 110], [90, -320, 90], [-20, -280, 80]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#4f8a5c" stroke="${INK}" stroke-width="5"/>`).join('')}</g>
+    <g class="yd-leaves">${[[-90, -330, 90], [0, -380, 110], [90, -320, 90], [-20, -280, 80]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#4f8a5c" stroke="${INK}" stroke-width="5"/>`).join('')}
+      ${[[-110, -350, 50], [-10, -410, 60], [70, -350, 46]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#6aa676"/>`).join('')}
+      ${[[-60, -290], [40, -300], [-120, -310], [110, -290], [0, -350], [-40, -400], [60, -400]].map(([x, y]) => `<path d="M${x} ${y} q8 -10 16 0 q-8 10 -16 0z" fill="#3c6e47"/>`).join('')}</g>
     ${[[-80, -300], [40, -350], [110, -300], [-30, -260]].map(([x, y], i) => `<g class="yd-pom yd-p${i}" transform="translate(${x} ${y})"><circle r="16" fill="#d0432f" stroke="${INK}" stroke-width="4"/><path d="M-6 -16 L0 -24 L6 -16" fill="#d0432f" stroke="${INK}" stroke-width="3"/></g>`).join('')}
     <rect x="-200" y="-480" width="400" height="480" fill="transparent"/>
   </g>
@@ -1034,28 +1180,34 @@ export function openYard({ onSeal, sealed }) {
   const cnt = el('span', 'yd-count', '福 <b>0</b> / 3'); S.root.querySelector('.lf-bar').prepend(cnt);
   const got = new Set();
   const reveal = { quilt: 1, cat: 2 };
+  // 福放到最上层，不会被被子、猫的点击区挡住
+  S.qa('.yd-fu').forEach(f => S.svg.insertBefore(f, S.q('.yd-drop')));
   // 福：被子吹开、猫挪开才露出来；正房门上那张倒贴的一直在
-  S.qa('.yd-fu').forEach(f => {
-    if (f.dataset.f !== '0') f.classList.add('hid');
-    f.addEventListener('click', e => {
-      e.stopPropagation(); const i = f.dataset.f;
+  function collect(f) {
+      const i = f.dataset.f;
       if (f.classList.contains('hid') || got.has(i)) return;
       got.add(i); f.classList.add('got'); sfx('bell');
       cnt.querySelector('b').textContent = got.size; cnt.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 500 });
       S.say(['倒着贴，“福到了”！', '被子后头藏着一个', '猫屁股底下还有一个'][i], 2200);
       if (got.size === 3) { S.hint('三个福都找到了'); if (!sealed()) setTimeout(() => S.stamp('院', onSeal), 900); }
-    });
+  }
+  S.qa('.yd-fu').forEach(f => {
+    if (f.dataset.f !== '0') f.classList.add('hid');
+    // pointerdown 比 click 更跟手：鼠标稍微一动也不会丢
+    f.addEventListener('pointerdown', e => { e.stopPropagation(); collect(f); });
   });
   const SND = {
     tree: () => sfx('drop'), cage: () => sfx('chirp'), quilt: () => sfx('steam'), tank: () => sfx('bubble'),
-    cat: () => sfx('meow'), rabbit: () => sfx('pop'), bike: () => sfx('bell'), diabolo: () => [0, 1, 2, 3, 4].forEach(i => tone(660 + i * 60, 680 + i * 60, .12, .04, 'sine', i * .09))
+    cat: () => sfx('meow'), rabbit: () => sfx('pop'), bike: () => sfx('bell'), diabolo: () => [0, 1, 2, 3, 4].forEach(i => tone(523 + i * 40, 530 + i * 40, .14, .035, 'sine', i * .1))
   };
   S.qa('.lf-item').forEach(g => g.addEventListener('click', e => {
     e.stopPropagation(); const k = g.dataset.k;
-    if (k === 'quilt' || k === 'cat') {
-      g.classList.toggle('moved');
-      const f = S.q(`.yd-fu${reveal[k]}`); f.classList.toggle('hid', !g.classList.contains('moved'));
-    } else S.pulse(g, 1400);
+    if ((k === 'quilt' || k === 'cat') && !g.classList.contains('moved')) {
+      g.classList.add('moved');
+      setTimeout(() => { S.q(`.yd-fu${reveal[k]}`).classList.remove('hid'); S.hint('看见“福”了吗？点它'); }, 500);
+      if (k === 'cat') S.say('喵～（挪个窝）', 1600, [1180, 560]);
+    } else if (k === 'quilt' || k === 'cat') { collect(S.q(`.yd-fu${reveal[k]}`)); }
+    else S.pulse(g, 1400);
     SND[k] && SND[k]();
     if (k === 'tree') dropPom();
   }));
