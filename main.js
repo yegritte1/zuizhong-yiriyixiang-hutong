@@ -284,11 +284,14 @@ function openSpot(s) {
     } else if (s.game === 'kite') {
       g.textContent = '▶ 《沙燕风筝》· 看完动手绘';
       g.onclick = () => { closePanel(); openVideo('kite', () => openGame('kite')); };
+    } else if (s.game === 'mask') {
+      g.textContent = '▶ 《京剧脸谱》· 看完动手勾';
+      g.onclick = () => { closePanel(); openVideo('mask', () => openGame('mask')); };
     } else {
       g.onclick = () => { closePanel(); openGame(s.game); };
     }
     act.appendChild(g);
-    if (s.game === 'maohou' || s.game === 'kite') {
+    if (s.game === 'maohou' || s.game === 'kite' || s.game === 'mask') {
       const v = document.createElement('button'); v.className = 'btn ghost';
       v.textContent = '跳过短片，直接动手';
       v.onclick = () => { closePanel(); openGame(s.game); };
@@ -448,6 +451,12 @@ const VIDEOS = {
     badge: '非遗短片', title: '《沙燕风筝》', dur: '40 秒',
     sub: '扎、糊、绘、放——把纸变成一只燕，让它飞上胡同的天空。',
     cta: '轮到你来绘一只', skip: '跳过，直接动手'
+  },
+  mask: {
+    src: './video/v4_mask.mp4', poster: './video/v4_mask_poster.jpg',
+    badge: '非遗短片', title: '《京剧脸谱》', dur: '40 秒',
+    sub: '红忠勇、黑刚直、白奸诈、蓝桀骜——一笔一色，画尽人间性情。',
+    cta: '轮到你来勾一张', skip: '跳过，直接动手'
   }
 };
 let vidOnDone = null, vidCurrent = null;
