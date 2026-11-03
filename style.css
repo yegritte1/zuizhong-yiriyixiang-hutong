@@ -206,7 +206,7 @@ body.night #clockLabel{color:#f2c46b}
 #timeline{position:absolute;left:8vw;right:8vw;bottom:34px;display:flex;justify-content:space-between;z-index:5}
 #timeline::before{content:"";position:absolute;left:0;right:0;top:22px;height:1px;background:currentColor;opacity:.45}
 #timeline .bar{position:absolute;left:0;top:21px;height:3px;background:var(--red);width:0}
-.tl{position:relative;flex:1;text-align:left;padding-top:34px;font-size:13px;letter-spacing:.15em;color:inherit;opacity:.6;transition:opacity .4s,color .4s}
+.tl{position:relative;flex:1;text-align:left;padding-top:34px;font-size:12px;letter-spacing:.04em;color:inherit;opacity:.6;transition:opacity .4s,color .4s}
 .tl small{position:absolute;top:2px;left:0;font-size:11px;letter-spacing:.1em;opacity:.8}
 .tl:hover{opacity:1}
 .tl.on{opacity:1;color:var(--red)}
