@@ -485,7 +485,7 @@ export function initKite(body, ui) {
   function startFly() {
     st.phase = 'fly'; st.baked = bake();
     tray.remove(); paint.remove(); wrap.classList.add('flying');
-    ui.tip('按住鼠标 / 空格 = 收线（风小时拉一拉让它爬升）；松开 = 放线（大风时松一松，线绷太紧会栽跟头）');
+    ui.tip('按住鼠标 / 空格 = 收线爬升；松开 = 放线缓降。让沙燕在绿色稳飞区累计飞满 6 秒，即可盖印。');
     const fc = el('canvas', 'fly-cv'); wrap.appendChild(fc);
     const hud = el('div', 'fly-hud', `
       <div class="fh-row"><span>风力</span><i class="fh-bar"><b id="fhWind"></b></i></div>
@@ -501,8 +501,8 @@ export function initKite(body, ui) {
     for (let i = 0; i < 40; i++) fly.streaks.push({ x: Math.random(), y: Math.random() * .7, l: .03 + Math.random() * .06 });
     const down = e => { if (e.type === 'keydown' && e.code !== 'Space') return; if (e.type === 'keydown') e.preventDefault(); fly.pull = true; };
     const up = e => { if (e.type === 'keyup' && e.code !== 'Space') return; fly.pull = false; };
-    fc.addEventListener('pointerdown', down); addEventListener('pointerup', up); addEventListener('keydown', down); addEventListener('keyup', up);
-    fly.cleanup = () => { removeEventListener('resize', fs); removeEventListener('pointerup', up); removeEventListener('keydown', down); removeEventListener('keyup', up); };
+    fc.addEventListener('pointerdown', down); addEventListener('pointerup', up); addEventListener('pointercancel', up); addEventListener('blur', up); addEventListener('keydown', down); addEventListener('keyup', up);
+    fly.cleanup = () => { removeEventListener('resize', fs); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); removeEventListener('blur', up); removeEventListener('keydown', down); removeEventListener('keyup', up); };
     const ZONE = [.56, .8];
     const tipEl = hud.querySelector('#fhTip');
     const say = (t, hold = 1.6) => { tipEl.textContent = t; fly.msgT = hold; };
@@ -510,21 +510,23 @@ export function initKite(body, ui) {
     function step(now) {
       raf = requestAnimationFrame(step);
       const dt = Math.min(.05, (now - last) / 1000); last = now; const f = fly; f.t += dt;
-      // 风：缓慢起伏 + 随机阵风
-      f.gustT -= dt; if (f.gustT < 0) { f.gust = .35 + Math.random() * .45; f.gustT = 3 + Math.random() * 4; if (!f.done) say('一阵大风！松一松线', 1.2); whoosh(1); }
-      f.gust *= Math.pow(.55, dt);
-      const wind = clamp(.42 + Math.sin(f.t * .7) * .18 + Math.sin(f.t * 1.9 + 1) * .08 + f.gust, .08, 1.3);
+      // 平缓风力；收线和放线的方向明确，速度按时间平滑而不是突然加速。
+      const wind = .55 + Math.sin(f.t * .55) * .1 + Math.sin(f.t * 1.1 + 1) * .04;
       f.wind = wind;
-      if (f.done) f.pull = false;
-      const lift = f.stall > 0 ? -.5 : (f.pull ? wind + .3 : wind * .78);
-      f.vy += (lift * 1.25 - .55) * dt * 1.6; f.vy *= Math.pow(.25, dt);
-      f.alt = clamp(f.alt + f.vy * dt * .55, .06, .96);
-      if (f.alt >= .96) f.vy = Math.min(0, f.vy);
-      // 线力
-      f.ten = clamp(f.ten + (f.pull ? (wind - .58) * 1.3 + .05 : -.8) * dt, 0, 1.05);
-      if (f.ten >= 1 && f.stall <= 0) { f.stall = 1.1; f.ten = .2; f.prog = Math.max(0, f.prog - .25); say('线绷得太紧，沙燕栽了个跟头！', 1.8); drum(); }
-      f.stall -= dt;
-      if (f.alt <= .07 && f.vy < 0) { f.vy = .3; say('差点挂在屋檐上……拉线救一下', 1.4); }
+      if (f.done) {
+        f.pull = false; f.vy = 0; f.stall = 0;
+        f.alt += (.68 - f.alt) * (1 - Math.exp(-3 * dt));
+        f.ten *= Math.exp(-2 * dt);
+      } else {
+        const desiredVy = f.stall > 0 ? -.12 : (f.pull ? .15 + (wind - .55) * .12 : -.075);
+        f.vy += (desiredVy - f.vy) * (1 - Math.exp(-5 * dt));
+        f.alt = clamp(f.alt + f.vy * dt, .06, .96);
+        if (f.alt >= .96) f.vy = Math.min(0, f.vy);
+        f.ten = clamp(f.ten + (f.pull ? .09 + Math.max(0, wind - .55) * .35 : -.55) * dt, 0, 1.05);
+        if (f.ten >= 1 && f.stall <= 0) { f.stall = .65; f.ten = .35; say('线有点紧，松一松就能稳住', 1.8); }
+        f.stall = Math.max(0, f.stall - dt);
+        if (f.alt <= .07 && f.vy < 0) { f.vy = 0; say('拉一拉线，让沙燕重新爬升', 1.4); }
+      }
       const inZone = f.alt > ZONE[0] && f.alt < ZONE[1] && f.stall <= 0;
       if (!f.done) {
         if (inZone) f.prog = Math.min(1, f.prog + dt / 6);
