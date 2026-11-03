@@ -138,30 +138,34 @@ const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
 addEventListener('scroll', () => { target = clamp(scrollY / maxScroll()) * (N - 1); $('#scrollHint').classList.add('hide'); }, { passive: true });
 addEventListener('mousemove', e => { mouseX = e.clientX / innerWidth - .5; mouseY = e.clientY / innerHeight - .5; });
 function goTo(i) { overview = false; scrollTo({ top: i / (N - 1) * maxScroll(), behavior: 'smooth' }); }
+/* 一滑一站：滚轮/触控板/滑动一次就飞到下一个时间点，不用使劲滚 */
+let snapLock = 0, wAcc = 0, wT = 0;
+const curStop = () => Math.round(clamp(scrollY / maxScroll()) * (N - 1));
 const blocked = e => !introAlive && (document.body.classList.contains('locked') || (e && e.target.closest && e.target.closest('#panel,#game,#menu,#finale')));
-/* 连续滚动：镜头随滚轮自由滑，不会一跳跳到下一站 */
+function step(d) {
+  const now = performance.now(); if (now < snapLock) return;
+  const i = clamp(curStop() + d, 0, N - 1); if (i === curStop()) return;
+  snapLock = now + 1000; goTo(i);
+}
 addEventListener('wheel', e => {
   if (introAlive || blocked(e)) return;
   e.preventDefault();
-  target = clamp((scrollY + e.deltaY * 5.5) / maxScroll() * (N - 1), 0, N - 1);
+  const now = performance.now(); if (now - wT > 250) wAcc = 0; wT = now;
+  wAcc += e.deltaY;
+  if (Math.abs(wAcc) > 25) { step(Math.sign(wAcc)); wAcc = 0; }
 }, { passive: false });
 let sy0 = null;
 addEventListener('touchstart', e => { sy0 = e.touches[0].clientY; }, { passive: true });
-addEventListener('touchmove', e => {
-  if (!introAlive && !blocked(e)) {
-    e.preventDefault();
-    target = clamp((scrollY - e.touches[0].clientY + sy0) / maxScroll() * (N - 1), 0, N - 1);
-  }
-}, { passive: false });
-addEventListener('touchend', e => {
-  if (sy0 === null || introAlive || blocked(e)) return;
-  sy0 = null;
-});
-// 键盘：按一下跳到下一章节（保留便捷性）
+addEventListener('touchmove', e => { if (!introAlive && !blocked(e)) e.preventDefault(); }, { passive: false });
+addEventListener('touchend', e => { if (sy0 === null || introAlive || blocked(e)) return; const d = sy0 - e.changedTouches[0].clientY; if (Math.abs(d) > 30) step(Math.sign(d)); sy0 = null; });
+addEventListener('keydown', e => { if (introAlive || blocked()) return;
+  if (['ArrowDown', 'PageDown', ' ', 'ArrowRight'].includes(e.key)) { e.preventDefault(); step(1); }
+  if (['ArrowUp', 'PageUp', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); step(-1); } });
 addEventListener('keydown', e => {
-  if (introAlive || blocked() || document.body.classList.contains('locked')) return;
-  if (['ArrowDown', 'PageDown', ' ', 'ArrowRight'].includes(e.key)) { e.preventDefault(); const i = Math.min(N - 1, Math.round(prog) + 1); goTo(i); }
-  if (['ArrowUp', 'PageUp', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); const i = Math.max(0, Math.round(prog) - 1); goTo(i); }
+  if (document.body.classList.contains('locked')) return;
+  const cur = Math.round(prog);
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(Math.min(N - 1, cur + 1)); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(Math.max(0, cur - 1)); }
 });
 
 // 每段之间：前 18% 和后 18% 停留在节点上，中间飞行
@@ -191,7 +195,7 @@ function showChapter(i) {
 /* ---------------- 主循环（3D 版） ---------------- */
 const haze = $('#haze'), moon = $('#moon'), veil = $('#veil');
 function frame(now) {
-  prog += (target - prog) * .018; // 连续滚动：跟得更慢，可以在中间停下来慢慢看
+  prog += (target - prog) * .055;
   if (Math.abs(target - prog) < .002) prog = target;
   mx += (mouseX - mx) * .05; my += (mouseY - my) * .05;
   ovT += ((overview ? 1 : 0) - ovT) * .06;
@@ -459,7 +463,7 @@ const ENTER_MS = 5200;   // 慢慢推门、慢慢往里走
 intro.addEventListener('mousemove', e => { imx = e.clientX / innerWidth - .5; imy = e.clientY / innerHeight - .5; });
 function finishIntro() {
   if (!intro.isConnected) return;
-  introP = 1; introAlive = false; $('#gl').style.filter = '';
+  introP = 1; introAlive = false; $('#gl').style.filter = ''; snapLock = performance.now() + 900;
   document.body.classList.remove('locked'); intro.remove();
 }
 function introLoop(now) {
