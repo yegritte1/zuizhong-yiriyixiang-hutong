@@ -189,9 +189,10 @@ body.night .ch-time{color:#f2c46b}
 .sound-btn.on .wave i{animation:eq 1.1s ease-in-out infinite}
 .sound-btn.on .wave i:nth-child(2){animation-delay:-.3s}.sound-btn.on .wave i:nth-child(3){animation-delay:-.6s}.sound-btn.on .wave i:nth-child(4){animation-delay:-.85s}
 @keyframes eq{0%,100%{height:3px}50%{height:14px}}
-.map-btn{font-size:14px;letter-spacing:.3em;position:relative;padding-bottom:10px}
-.map-btn i{position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor}
+.map-btn,.home-btn{font-size:14px;letter-spacing:.3em;position:relative;padding-bottom:10px;cursor:pointer;background:none;border:none;color:currentColor;font-family:inherit}
+.map-btn i,.home-btn i{position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor}
 .map-btn i::after{content:"";position:absolute;right:-2px;top:-3px;border-left:6px solid currentColor;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
+.home-btn i::after{content:"";position:absolute;right:-2px;top:-3px;border-left:6px solid currentColor;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent}
 body.night #hud,body.night #clock,body.night #timeline{color:#efe6cf}
 body.night .seal-slot:not(.on){border-color:rgba(239,230,207,.4);color:rgba(239,230,207,.4)}
 

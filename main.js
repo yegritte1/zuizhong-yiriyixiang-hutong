@@ -376,6 +376,7 @@ $('#finaleClose').onclick = () => { $('#finale').classList.remove('open'); docum
 
 /* ---------------- HUD 按钮 ---------------- */
 $('#mapBtn').onclick = () => { overview = !overview; $('#mapBtn').firstChild.textContent = overview ? '返 回' : '全 图'; };
+$('#homeBtn').onclick = () => { overview = false; scrollTo({ top: 0, behavior: 'smooth' }); };
 $('#menuBtn').onclick = () => $('#menu').classList.add('open');
 const sndBtn = $('#soundBtn');
 function paintSound() { sndBtn.classList.toggle('on', soundOn()); sndBtn.querySelector('b').textContent = soundOn() ? '声 开' : '声 关'; }
