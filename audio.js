@@ -104,7 +104,7 @@ function kongzhu() {
 }
 // 鸟鸣：几声短促的啾啾
 function birds() {
-  const n = 3 + (Math.random() * 4 | 0), o = out(.05, rnd(-.8, .8), .4), base = rnd(2800, 3800);
+  const n = 3 + (Math.random() * 4 | 0), o = out(.035, rnd(-.8, .8), .25), base = rnd(1900, 2600);
   let t = ctx.currentTime;
   for (let i = 0; i < n; i++) {
     const os = ctx.createOscillator(), g = ctx.createGain(), d = rnd(.05, .11);
@@ -117,10 +117,10 @@ function birds() {
 // 锣鼓：大锣“仓”、小锣“台”、板鼓“大”
 function hit(type, t, o) {
   if (type === 'da') {
-    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-    s.buffer = noiseBuf(.15); f.type = 'bandpass'; f.frequency.value = 1400; f.Q.value = 3;
-    g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.001, t + .08);
-    s.connect(f); f.connect(g); g.connect(o); s.start(t); return;
+    const s = ctx.createOscillator(), g = ctx.createGain();   // 板鼓改成干净的木头声，不用噪声
+    s.type = 'triangle'; s.frequency.setValueAtTime(620, t); s.frequency.exponentialRampToValueAtTime(380, t + .07);
+    g.gain.setValueAtTime(.5, t); g.gain.exponentialRampToValueAtTime(.001, t + .08);
+    s.connect(g); g.connect(o); s.start(t); s.stop(t + .1); return;
   }
   const big = type === 'cang', base = big ? 190 : 820;
   const ratios = big ? [1, 1.48, 2.1, 2.76, 3.9] : [1, 1.08, 2.3];
@@ -131,12 +131,6 @@ function hit(type, t, o) {
     g.gain.exponentialRampToValueAtTime(.001, t + (big ? 1.8 : .45) / (1 + i * .25));
     os.connect(g); g.connect(o); os.start(t); os.stop(t + 2);
   });
-  if (big) { // 铙钹的沙沙声
-    const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-    s.buffer = noiseBuf(1.2); f.type = 'highpass'; f.frequency.value = 3500;
-    g.gain.setValueAtTime(.35, t); g.gain.exponentialRampToValueAtTime(.001, t + 1);
-    s.connect(f); f.connect(g); g.connect(o); s.start(t);
-  }
 }
 function luogu() {
   const o = out(.13, rnd(-.3, .3), .25), t = ctx.currentTime + .05;
@@ -146,7 +140,7 @@ function luogu() {
 }
 // 蛐蛐：两只，此起彼伏
 function cricket() {
-  const o = out(.03, rnd(-.9, .9), .15), f = rnd(4300, 4900);
+  const o = out(.02, rnd(-.9, .9), .1), f = rnd(3200, 3700);
   let t = ctx.currentTime;
   const chirps = 2 + (Math.random() * 3 | 0);
   for (let c = 0; c < chirps; c++) {

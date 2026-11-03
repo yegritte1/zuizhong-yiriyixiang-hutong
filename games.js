@@ -26,13 +26,12 @@ export function gong(big = true) {
     });
   } catch (e) {}
 }
-function drum() {
+function drum() {   // 鼓点改成干净的低音“咚”，不用噪声
   try {
-    const a = ac(), t = a.currentTime, len = a.sampleRate * .25, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
-    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
-    s.buffer = buf; f.type = 'lowpass'; f.frequency.value = 900; g.gain.value = .5;
-    s.connect(f); f.connect(g); g.connect(a.destination); s.start(t);
+    const a = ac(), t = a.currentTime, o = a.createOscillator(), g = a.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(70, t + .22);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.4, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + .28);
+    o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + .3);
   } catch (e) {}
 }
 function whoosh() { /* 风声噪音已去掉（听感刺耳） */ }

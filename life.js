@@ -39,10 +39,7 @@ export function sfx(type) {
       case 'xiao': tone(880, 1320, .25, .08); tone(1320, 1760, .2, .06, 'sine', .2); break;
       case 'coin': tone(1900, 2100, .12, .07); tone(2500, 2600, .18, .06, 'sine', .08); break;
       case 'bead': tone(1200, 1000, .04, .08, 'triangle'); break;
-      case 'whistle': [700, 1050, 1400].forEach((f, i) => { const a = ac(), t = a.currentTime, o = a.createOscillator(), g = a.createGain(), l = a.createOscillator(), lg = a.createGain();
-          o.frequency.value = f; l.frequency.value = 5 + i; lg.gain.value = f * .012; l.connect(lg); lg.connect(o.frequency);
-          g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.035, t + .8); g.gain.linearRampToValueAtTime(.0001, t + 2.6);
-          o.connect(g); g.connect(a.destination); o.start(t); l.start(t); o.stop(t + 2.7); l.stop(t + 2.7); }); break;
+      case 'whistle': [784, 880, 1047, 1175].forEach((f, i) => tone(f, f * .998, .7, .045, 'sine', i * .11)); break; // 柔和风铃，代替鸽哨（原 FM 音听感刺耳）
       case 'meow': tone(700, 1000, .18, .05, 'triangle'); tone(1000, 600, .3, .05, 'triangle', .18); break;
       case 'hao': tone(300, 420, .3, .09, 'triangle'); break;
     }
@@ -928,5 +925,149 @@ export function openOpera({ onSeal, sealed }) {
   tap('drum', () => [0, 1, 2, 3, 4].forEach(i => setTimeout(() => sfx('clack'), i * 110)));
   tap('tea', () => { sfx('bead'); setTimeout(() => sfx('bead'), 200); });
   tap('seed', () => { sfx('clack'); setTimeout(() => sfx('pop'), 140); });
+  return S;
+}
+
+/* ================= ④ 四合院 · 找福 ================= */
+const fuMark = (s = 1, rot = 0) => `<g transform="rotate(${rot}) scale(${s})"><rect x="-30" y="-30" width="60" height="60" rx="4" transform="rotate(45)" fill="#c23a2b" stroke="${INK}" stroke-width="4"/>
+  <text y="15" text-anchor="middle" font-size="42" fill="#f3d27a" font-family="YRTitle,serif" transform="rotate(180)">福</text></g>`;
+function yardSVG() {
+  const tiles = n => Array.from({ length: n }, (_, i) => `<path d="M${i * 46} 0 q23 -16 46 0" fill="none" stroke="${INK}" stroke-width="3"/>`).join('');
+  return `
+<svg class="lf-stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <rect width="1600" height="900" fill="#cfe0e6"/>
+  <rect y="560" width="1600" height="340" fill="#d8ccb2"/>
+  ${Array.from({ length: 12 }, (_, i) => `<path d="M0 ${600 + i * 26} H1600" stroke="#c4b796" stroke-width="2"/>`).join('')}
+  <!-- 正房（北） -->
+  <g transform="translate(400 210)">
+    <path d="M-40 40 L60 -40 H740 L840 40 Z" fill="#5d6466" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+    <g transform="translate(0 30)">${tiles(18)}</g>
+    <rect x="0" y="40" width="800" height="320" fill="#b8473a" stroke="${INK}" stroke-width="6"/>
+    ${[0, 1, 2, 3].map(i => `<rect x="${40 + i * 190}" y="80" width="150" height="190" fill="#f2e6c9" stroke="${INK}" stroke-width="5"/>
+      <path d="M${40 + i * 190} 175 H${190 + i * 190} M${115 + i * 190} 80 V270" stroke="#8a3a2e" stroke-width="4"/>`).join('')}
+    <rect x="0" y="300" width="800" height="60" fill="#8a3a2e" stroke="${INK}" stroke-width="5"/>
+  </g>
+  <!-- 正房门上的福（倒贴） -->
+  <g class="yd-fu yd-fu0" data-f="0" transform="translate(590 380)">${fuMark(.8)}</g>
+  <!-- 石榴树（左） -->
+  <g class="lf-item yd-tree" data-k="tree" transform="translate(200 640)" data-tip="石榴树|多子多福">
+    <path d="M-14 0 Q-20 -160 0 -260 M0 -200 Q60 -240 90 -300 M0 -220 Q-60 -260 -90 -310" fill="none" stroke="#6b4428" stroke-width="22" stroke-linecap="round"/>
+    <g class="yd-leaves">${[[-90, -330, 90], [0, -380, 110], [90, -320, 90], [-20, -280, 80]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#4f8a5c" stroke="${INK}" stroke-width="5"/>`).join('')}</g>
+    ${[[-80, -300], [40, -350], [110, -300], [-30, -260]].map(([x, y], i) => `<g class="yd-pom yd-p${i}" transform="translate(${x} ${y})"><circle r="16" fill="#d0432f" stroke="${INK}" stroke-width="4"/><path d="M-6 -16 L0 -24 L6 -16" fill="#d0432f" stroke="${INK}" stroke-width="3"/></g>`).join('')}
+    <rect x="-200" y="-480" width="400" height="480" fill="transparent"/>
+  </g>
+  <!-- 鸟笼挂在树枝 -->
+  <g class="lf-item yd-cage" data-k="cage" transform="translate(300 380)" data-tip="鸟笼|画眉一早要遛">
+    <path d="M0 -60 V-20" stroke="#6b4428" stroke-width="4"/>
+    <path d="M-50 70 V0 Q0 -50 50 0 V70 Z" fill="rgba(255,255,255,.2)" stroke="#6b4428" stroke-width="5"/>
+    ${[-30, -10, 10, 30].map(x => `<path d="M${x} 70 V${-18 + Math.abs(x) * .4}" stroke="#6b4428" stroke-width="3"/>`).join('')}
+    <rect x="-56" y="66" width="112" height="12" rx="4" fill="#6b4428"/>
+    <g class="yd-bird" transform="translate(0 40)"><ellipse rx="18" ry="13" fill="#c9a227" stroke="${INK}" stroke-width="3"/><circle cx="14" cy="-8" r="9" fill="#c9a227" stroke="${INK}" stroke-width="3"/><path d="M22 -8 l10 3 l-10 3" fill="#e07a2a"/><circle cx="16" cy="-10" r="2" fill="${INK}"/></g>
+    <rect x="-60" y="-60" width="120" height="140" fill="transparent"/>
+  </g>
+  <!-- 晾衣绳 + 被子（后面藏福） -->
+  <path d="M960 330 Q1200 370 1440 330" fill="none" stroke="#6b4428" stroke-width="4"/>
+  <g class="yd-fu yd-fu1" data-f="1" transform="translate(1210 430)">${fuMark(.9)}</g>
+  <g class="lf-item yd-quilt" data-k="quilt" transform="translate(1210 350)" data-tip="晒被子|正午太阳好">
+    <g class="yd-qbody"><path d="M-130 0 H130 V190 Q0 210 -130 190 Z" fill="#3f6fa0" stroke="${INK}" stroke-width="5"/>
+      ${[-80, -20, 40, 100].map((x, i) => `<circle cx="${x}" cy="${60 + (i % 2) * 70}" r="20" fill="#f2e6c9" stroke="${INK}" stroke-width="3"/>`).join('')}
+      <path d="M-130 0 Q0 26 130 0" fill="none" stroke="${INK}" stroke-width="3"/></g>
+    <rect x="-140" y="-10" width="280" height="220" fill="transparent"/>
+  </g>
+  <!-- 鱼缸（中） -->
+  <g class="lf-item yd-tank" data-k="tank" transform="translate(800 760)" data-tip="大鱼缸|金鱼摆尾">
+    <path d="M-130 -110 H130 Q120 40 0 50 Q-120 40 -130 -110 Z" fill="#8a6a50" stroke="${INK}" stroke-width="6"/>
+    <path d="M-110 -70 Q0 -50 110 -70" fill="none" stroke="#c9a227" stroke-width="5" stroke-dasharray="12 10"/>
+    <ellipse cx="0" cy="-110" rx="130" ry="26" fill="#6fa7b8" stroke="${INK}" stroke-width="5"/>
+    <g class="yd-fish"><path d="M-20 -112 q20 -14 40 0 q-20 14 -40 0z" fill="#e07a2a" stroke="${INK}" stroke-width="3"/><path d="M20 -112 l16 -10 v20z" fill="#e07a2a" stroke="${INK}" stroke-width="3"/></g>
+    <g class="yd-ripple"><ellipse cx="0" cy="-110" rx="30" ry="6" fill="none" stroke="#fffaf0" stroke-width="3"/></g>
+    <path d="M-60 -116 q10 -20 20 0 M50 -112 q8 -16 16 0" fill="#4f8a5c" stroke="${INK}" stroke-width="3"/>
+    <rect x="-140" y="-150" width="280" height="200" fill="transparent"/>
+  </g>
+  <!-- 门墩 + 猫（猫下面藏福） -->
+  <g transform="translate(1080 720)">
+    <rect x="-70" y="-40" width="140" height="80" rx="10" fill="#9a9384" stroke="${INK}" stroke-width="5"/>
+    <circle cx="0" cy="-70" r="46" fill="#a8a194" stroke="${INK}" stroke-width="5"/><circle cx="0" cy="-70" r="24" fill="none" stroke="${INK}" stroke-width="3"/>
+  </g>
+  <g class="yd-fu yd-fu2" data-f="2" transform="translate(1080 650)">${fuMark(.7)}</g>
+  <g class="lf-item yd-cat" data-k="cat" transform="translate(1080 640)" data-tip="大花猫|晒太阳，别吵它">
+    <g class="yd-catb">
+      <ellipse cx="0" cy="0" rx="62" ry="34" fill="#e7a95a" stroke="${INK}" stroke-width="5"/>
+      <path d="M-30 -10 q10 10 0 22 M0 -16 q10 10 0 24 M30 -10 q10 10 0 22" stroke="#b5732e" stroke-width="5" fill="none"/>
+      <g class="yd-cathead" transform="translate(-58 -20)"><circle r="30" fill="#e7a95a" stroke="${INK}" stroke-width="5"/>
+        <path d="M-24 -16 L-20 -44 L-4 -26 M24 -16 L20 -44 L4 -26" fill="#e7a95a" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
+        <path class="yd-eye" d="M-14 -2 q5 4 10 0 M6 -2 q5 4 10 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+        <path d="M-3 10 l3 3 l3 -3" fill="none" stroke="${INK}" stroke-width="3"/></g>
+      <path class="yd-tail" d="M58 6 Q110 -10 100 -60" fill="none" stroke="#e7a95a" stroke-width="14" stroke-linecap="round"/>
+    </g>
+    <rect x="-100" y="-70" width="220" height="110" fill="transparent"/>
+  </g>
+  <!-- 兔儿爷（窗台） -->
+  <g class="lf-item yd-rabbit" data-k="rabbit" transform="translate(1000 520)" data-tip="兔儿爷|老北京的中秋泥人">
+    <path d="M-26 0 Q-30 -60 0 -64 Q30 -60 26 0 Z" fill="#c23a2b" stroke="${INK}" stroke-width="4"/>
+    <circle cx="0" cy="-80" r="20" fill="#fbf8f0" stroke="${INK}" stroke-width="4"/>
+    <path d="M-8 -96 Q-14 -140 -4 -142 Q2 -120 -2 -98 M8 -96 Q14 -140 4 -142 Q-2 -120 2 -98" fill="#fbf8f0" stroke="${INK}" stroke-width="3"/>
+    <path d="M-6 -78 h4 M2 -78 h4" stroke="${INK}" stroke-width="3"/><path d="M-3 -70 q3 3 6 0" stroke="#c23a2b" stroke-width="3" fill="none"/>
+    <rect x="-30" y="-24" width="60" height="10" fill="#c9a227"/>
+    <rect x="-40" y="-150" width="80" height="160" fill="transparent"/>
+  </g>
+  <!-- 自行车（右前） -->
+  <g class="lf-item yd-bike" data-k="bike" transform="translate(1390 760)" data-tip="二八大杠|叮铃铃——">
+    <g class="yd-wheel" transform="translate(-80 40)"><circle r="56" fill="none" stroke="${INK}" stroke-width="7"/><path d="M-56 0 H56 M0 -56 V56 M-40 -40 L40 40 M40 -40 L-40 40" stroke="${INK}" stroke-width="2"/></g>
+    <g class="yd-wheel" transform="translate(90 40)"><circle r="56" fill="none" stroke="${INK}" stroke-width="7"/><path d="M-56 0 H56 M0 -56 V56 M-40 -40 L40 40 M40 -40 L-40 40" stroke="${INK}" stroke-width="2"/></g>
+    <path d="M-80 40 L-10 -40 H70 L90 40 M-10 -40 L10 40 L70 -40 M-10 -40 L-20 -70 M70 -40 L60 -80" fill="none" stroke="#2b2724" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M-40 -74 H0" stroke="${INK}" stroke-width="10" stroke-linecap="round"/><path d="M40 -86 H84" stroke="${INK}" stroke-width="7" stroke-linecap="round"/>
+    <circle class="yd-bell" cx="74" cy="-96" r="9" fill="#c9c4b8" stroke="${INK}" stroke-width="3"/>
+    <rect x="-150" y="-110" width="310" height="210" fill="transparent"/>
+  </g>
+  <!-- 石桌 + 空竹 -->
+  <g class="lf-item yd-diabolo" data-k="diabolo" transform="translate(520 780)" data-tip="空竹|抖起来，转得飞快">
+    <path d="M-90 -40 H90 L70 -20 H-70 Z" fill="#a8a194" stroke="${INK}" stroke-width="5"/><rect x="-24" y="-20" width="48" height="80" fill="#9a9384" stroke="${INK}" stroke-width="5"/>
+    <g class="yd-dia" transform="translate(0 -66)"><g class="yd-diab"><path d="M-40 -20 L-6 0 L-40 20 Z M40 -20 L6 0 L40 20 Z" fill="#2f5d8a" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><ellipse cx="-40" rx="6" ry="20" fill="#c23a2b" stroke="${INK}" stroke-width="3"/><ellipse cx="40" rx="6" ry="20" fill="#c23a2b" stroke="${INK}" stroke-width="3"/></g></g>
+    <rect x="-100" y="-100" width="200" height="160" fill="transparent"/>
+  </g>
+  <g class="yd-drop"></g>
+</svg>`;
+}
+export function openYard({ onSeal, sealed }) {
+  const S = shell({ kicker: '四合院 · 12:00', title: '院 里 找 福', svg: yardSVG(), hint: '院里藏着 3 个“福”', bubbleAt: [800, 180], cls: 'lf-yard' });
+  const cnt = el('span', 'yd-count', '福 <b>0</b> / 3'); S.root.querySelector('.lf-bar').prepend(cnt);
+  const got = new Set();
+  const reveal = { quilt: 1, cat: 2 };
+  // 福：被子吹开、猫挪开才露出来；正房门上那张倒贴的一直在
+  S.qa('.yd-fu').forEach(f => {
+    if (f.dataset.f !== '0') f.classList.add('hid');
+    f.addEventListener('click', e => {
+      e.stopPropagation(); const i = f.dataset.f;
+      if (f.classList.contains('hid') || got.has(i)) return;
+      got.add(i); f.classList.add('got'); sfx('bell');
+      cnt.querySelector('b').textContent = got.size; cnt.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 500 });
+      S.say(['倒着贴，“福到了”！', '被子后头藏着一个', '猫屁股底下还有一个'][i], 2200);
+      if (got.size === 3) { S.hint('三个福都找到了'); if (!sealed()) setTimeout(() => S.stamp('院', onSeal), 900); }
+    });
+  });
+  const SND = {
+    tree: () => sfx('drop'), cage: () => sfx('chirp'), quilt: () => sfx('steam'), tank: () => sfx('bubble'),
+    cat: () => sfx('meow'), rabbit: () => sfx('pop'), bike: () => sfx('bell'), diabolo: () => [0, 1, 2, 3, 4].forEach(i => tone(660 + i * 60, 680 + i * 60, .12, .04, 'sine', i * .09))
+  };
+  S.qa('.lf-item').forEach(g => g.addEventListener('click', e => {
+    e.stopPropagation(); const k = g.dataset.k;
+    if (k === 'quilt' || k === 'cat') {
+      g.classList.toggle('moved');
+      const f = S.q(`.yd-fu${reveal[k]}`); f.classList.toggle('hid', !g.classList.contains('moved'));
+    } else S.pulse(g, 1400);
+    SND[k] && SND[k]();
+    if (k === 'tree') dropPom();
+  }));
+  function dropPom() {
+    const p = S.q(`.yd-p${Math.random() * 4 | 0}`); const c = p.cloneNode(true);
+    const m = p.transform.baseVal.consolidate().matrix;
+    c.setAttribute('class', 'yd-pomfall'); c.setAttribute('transform', `translate(${200 + m.e} ${640 + m.f})`);
+    S.q('.yd-drop').appendChild(c);
+    c.animate([{ translate: '0 0' }, { translate: `${rnd(-20, 20)}px ${-m.f - 20}px`, offset: .8 }, { translate: `${rnd(-30, 30)}px ${-m.f - 34}px` }], { duration: 900, easing: 'cubic-bezier(.5,0,.8,.6)', fill: 'forwards' });
+    setTimeout(() => sfx('drop'), 800);
+    setTimeout(() => c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' }).onfinish = () => c.remove(), 2200);
+  }
+  setTimeout(() => S.say('院里东西都能点点', 2400), 700);
   return S;
 }

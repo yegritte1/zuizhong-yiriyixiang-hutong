@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { initMaohou, initKite, initMask } from './games.js';
 import { updateAmbient, setSound, soundOn, soundPref } from './audio.js';
-import { openBreakfast, openPigeon, openStore, openOpera } from './life.js';
+import { openBreakfast, openPigeon, openStore, openOpera, openYard } from './life.js';
 /* 一日一巷 · 胡同里的时间遗产
  * 一张胡同图，滚动 = 时间流逝；镜头沿胡同由东（晨）向西（夜）飞行，换光不换图。
  */
@@ -45,7 +45,7 @@ const SPOTS = [
            '小小一只毛猴，拉洋车、卖糖葫芦、剃头、说书……把老北京的市井百态全装进了方寸之间。',
            '<span class="tag">蝉蜕</span><span class="tag">辛夷</span><span class="tag">白芨</span>'],
     game: 'maohou' },
-  { id: 'yard', x: .5, y: .52, from: 10, to: 14, label: '四合院', img: 'courtyard',
+  { id: 'yard', x: .5, y: .52, from: 10, to: 14, label: '四合院 · 找福', img: 'courtyard', life: 'yard',
     kicker: '正午 · 12:00', title: '四合院',
     text: ['天棚鱼缸石榴树，先生肥狗胖丫头。院里的大槐树下挂着鸟笼，石桌上放着空竹，窗台上蹲着一只兔儿爷。',
            '<span class="tag">鸟笼</span><span class="tag">空竹</span><span class="tag">兔儿爷</span>'] },
@@ -264,6 +264,7 @@ function openSpot(s) {
   if (s.finale) return openFinale();
   if (s.life === 'breakfast') return openBreakfast({ sealed: () => lifeSeals.has('早'), onSeal: () => { lifeSeals.add('早'); } });
   if (s.life === 'pigeon') return openPigeon({ sealed: () => lifeSeals.has('鸽'), onSeal: () => { lifeSeals.add('鸽'); } });
+  if (s.life === 'yard') return openYard({ sealed: () => lifeSeals.has('院'), onSeal: () => { lifeSeals.add('院'); } });
   if (s.life === 'opera') return openOpera({ sealed: () => lifeSeals.has('戏'), onSeal: () => { lifeSeals.add('戏'); } });
   if (s.life === 'store') return openStore({ sealed: () => lifeSeals.has('铺'), onSeal: () => { lifeSeals.add('铺'); } });
   $('#panelKicker').textContent = s.kicker;
