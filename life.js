@@ -743,3 +743,190 @@ export function openStore({ onSeal, sealed }) {
   };
   return S;
 }
+
+/* ================= ⑤ 戏楼 · 换脸谱 · 叫个好 ================= */
+// 三张脸：只换颜色和纹样，人物不变——点不同的脸谱，台上的角儿就“变脸”
+const XL_FACES = {
+  red:   { name: '红脸 · 关羽', tip: '红是忠勇，赤胆忠心', base: '#c23a2b', brow: INK, mark: '#2b2724', line: '“青龙偃月，过五关斩六将”' },
+  black: { name: '黑脸 · 包拯', tip: '黑是刚直，铁面无私', base: '#2b2724', brow: '#f4ece0', mark: '#f4ece0', line: '“开封有个包青天”' },
+  white: { name: '白脸 · 曹操', tip: '白是奸诈，多疑善谋', base: '#f4ece0', brow: INK, mark: '#2b2724', line: '“宁教我负天下人”' },
+  blue:  { name: '蓝脸 · 窦尔敦', tip: '蓝是桀骜，刚强勇猛', base: '#2f5d8a', brow: INK, mark: '#f4ece0', line: '“盗御马，坐寨黄天坝”' }
+};
+function xlFace(f, s = 1) {
+  return `<g transform="scale(${s})">
+    <path d="M-52 -40 Q-56 40 0 70 Q56 40 52 -40 Q40 -78 0 -80 Q-40 -78 -52 -40 Z" fill="${f.base}" stroke="${INK}" stroke-width="5"/>
+    <path d="M-40 -22 Q-22 -40 -6 -20 M40 -22 Q22 -40 6 -20" fill="none" stroke="${f.brow}" stroke-width="9" stroke-linecap="round"/>
+    <path d="M-34 -6 Q-20 -16 -8 -4 Q-20 6 -34 -6 Z M34 -6 Q20 -16 8 -4 Q20 6 34 -6 Z" fill="#fbf8f0" stroke="${INK}" stroke-width="3"/>
+    <circle cx="-20" cy="-6" r="4" fill="${INK}"/><circle cx="20" cy="-6" r="4" fill="${INK}"/>
+    <path d="M0 -70 V-34" stroke="${f.mark}" stroke-width="6" stroke-linecap="round"/>
+    <path d="M-10 14 Q0 26 10 14" fill="${f.mark}" stroke="${INK}" stroke-width="3"/>
+    <path d="M-20 40 Q0 50 20 40" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+  </g>`;
+}
+function operaSVG() {
+  const seats = [260, 520, 1080, 1340].map((x, i) => `
+    <g transform="translate(${x} 820)"><rect x="-70" y="-30" width="140" height="22" rx="6" fill="#8a5a36" stroke="${INK}" stroke-width="4"/>
+      <rect x="-60" y="-8" width="10" height="44" fill="#6b4428"/><rect x="50" y="-8" width="10" height="44" fill="#6b4428"/></g>`).join('');
+  return `
+<svg class="lf-stage" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="xlSpot" cx="50%" cy="40%" r="55%"><stop offset="0" stop-color="#fff2c8" stop-opacity=".85"/><stop offset="1" stop-color="#fff2c8" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#3b2a24"/>
+  <!-- 戏台：红柱、飞檐、匾额 -->
+  <path d="M120 120 Q800 40 1480 120 L1440 160 H160 Z" fill="#2f5d8a" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M160 160 H1440 V196 H160 Z" fill="#c9a227" stroke="${INK}" stroke-width="5"/>
+  ${[0,1,2,3,4,5,6,7,8,9,10,11,12].map(i => `<circle cx="${200 + i * 100}" cy="178" r="8" fill="#c23a2b" stroke="${INK}" stroke-width="2"/>`).join('')}
+  <g transform="translate(800 120)"><rect x="-120" y="-36" width="240" height="64" rx="8" fill="#2b2724" stroke="#c9a227" stroke-width="5"/>
+    <text x="0" y="12" text-anchor="middle" font-size="40" fill="#e0ad3a" font-family="YRTitle,serif" letter-spacing="10">出将入相</text></g>
+  <rect x="200" y="196" width="40" height="520" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+  <rect x="1360" y="196" width="40" height="520" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+  <!-- 台板 -->
+  <path d="M120 700 H1480 L1520 760 H80 Z" fill="#7a4e2e" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+  <!-- 舞台后墙 + 灯 -->
+  <rect x="240" y="196" width="1120" height="504" fill="#5a3a2e"/>
+  <ellipse class="xl-spot" cx="800" cy="470" rx="420" ry="300" fill="url(#xlSpot)"/>
+  <!-- 角儿（靠旗、蟒袍、脸谱） -->
+  <g class="xl-actor" transform="translate(800 690)">
+    <g class="xl-flags">${[-60,-20,20,60].map(a => `<g transform="rotate(${a} 0 -330)"><path d="M0 -330 V-470" stroke="#6b4428" stroke-width="5"/><path d="M0 -470 L46 -450 L0 -410 Z" fill="#c23a2b" stroke="${INK}" stroke-width="3"/></g>`).join('')}</g>
+    <g class="xl-body">
+      <path d="M-110 0 Q-120 -160 -70 -250 H70 Q120 -160 110 0 Z" fill="#2f6b4f" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M-70 -250 Q0 -200 70 -250" fill="none" stroke="#e0ad3a" stroke-width="10"/>
+      <path d="M-60 -150 Q0 -120 60 -150 M-80 -70 Q0 -40 80 -70" fill="none" stroke="#e0ad3a" stroke-width="5" stroke-dasharray="14 10"/>
+      <circle cx="0" cy="-160" r="26" fill="#e0ad3a" stroke="${INK}" stroke-width="4"/>
+      <rect x="-90" y="-110" width="180" height="16" rx="8" fill="#c9a227" stroke="${INK}" stroke-width="3"/>
+    </g>
+    <g class="xl-arm-l"><path d="M-70 -230 Q-170 -230 -200 -160" fill="none" stroke="#2f6b4f" stroke-width="40" stroke-linecap="round"/>
+      <path class="xl-sleeve" d="M-200 -160 Q-250 -60 -190 -20 Q-170 -90 -180 -150 Z" fill="#fbf8f0" stroke="${INK}" stroke-width="4"/></g>
+    <g class="xl-arm-r"><path d="M70 -230 Q170 -250 190 -330" fill="none" stroke="#2f6b4f" stroke-width="40" stroke-linecap="round"/>
+      <path d="M190 -330 L205 -520" stroke="#6b4428" stroke-width="10" stroke-linecap="round"/>
+      <path d="M205 -520 Q250 -500 240 -460 L200 -470 Z" fill="#c9c4b8" stroke="${INK}" stroke-width="4"/></g>
+    <g class="xl-head" transform="translate(0 -320)">
+      <path d="M-62 -60 Q0 -130 62 -60 L54 -40 H-54 Z" fill="#c9a227" stroke="${INK}" stroke-width="5"/>
+      ${[-40,0,40].map(x => `<circle cx="${x}" cy="-90" r="10" fill="#c23a2b" stroke="${INK}" stroke-width="3"/>`).join('')}
+      <g class="xl-face">${xlFace(XL_FACES.red)}</g>
+      <path class="xl-beard" d="M-30 50 Q-40 140 0 160 Q40 140 30 50 Z" fill="#2b2724" stroke="${INK}" stroke-width="3"/>
+    </g>
+    <circle class="xl-ring" cx="0" cy="-320" r="120" fill="none" stroke="#e0ad3a" stroke-width="8"/>
+  </g>
+  <!-- 幕布（左右两扇，点了拉开） -->
+  <g class="xl-curtain lf-item" data-k="curtain" data-tip="幕布|点一下，开锣">
+    <g class="xl-cl"><path d="M240 196 H810 V700 H240 Z" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+      ${[300,380,460,540,620,700,780].map(x => `<path d="M${x} 196 Q${x + 18} 450 ${x} 700" fill="none" stroke="#7d2219" stroke-width="5"/>`).join('')}</g>
+    <g class="xl-cr"><path d="M790 196 H1360 V700 H790 Z" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+      ${[840,920,1000,1080,1160,1240,1320].map(x => `<path d="M${x} 196 Q${x + 18} 450 ${x} 700" fill="none" stroke="#7d2219" stroke-width="5"/>`).join('')}</g>
+  </g>
+  <!-- 台口乐队：锣、鼓、京胡 -->
+  <g class="lf-item xl-gong" data-k="gong" transform="translate(150 640)" data-tip="大锣|“哐——”">
+    <path d="M0 -150 V-90" stroke="#6b4428" stroke-width="6"/><circle cx="0" cy="-50" r="46" fill="#c9a227" stroke="${INK}" stroke-width="5"/><circle cx="0" cy="-50" r="16" fill="#e0ad3a" stroke="${INK}" stroke-width="3"/>
+    <rect x="-60" y="-110" width="120" height="120" fill="transparent"/></g>
+  <g class="lf-item xl-drum" data-k="drum" transform="translate(1450 650)" data-tip="单皮鼓|一出戏的指挥">
+    <path d="M-40 -60 L-50 60 M40 -60 L50 60" stroke="#6b4428" stroke-width="7"/>
+    <ellipse cx="0" cy="-60" rx="56" ry="18" fill="#efe1c4" stroke="${INK}" stroke-width="5"/><path d="M-56 -60 V-30 Q0 -10 56 -30 V-60" fill="#a8322a" stroke="${INK}" stroke-width="5"/>
+    <g class="xl-stick"><path d="M20 -120 L-6 -66" stroke="#3a2a1e" stroke-width="6" stroke-linecap="round"/></g></g>
+  <!-- 台下：八仙桌、盖碗茶、瓜子 -->
+  <path d="M0 760 H1600 V900 H0 Z" fill="#4a352b"/>
+  ${seats}
+  <g transform="translate(800 820)"><rect x="-190" y="-40" width="380" height="26" rx="6" fill="#8a5a36" stroke="${INK}" stroke-width="5"/>
+    <rect x="-170" y="-14" width="14" height="80" fill="#6b4428"/><rect x="156" y="-14" width="14" height="80" fill="#6b4428"/></g>
+  <g class="lf-item xl-tea" data-k="tea" transform="translate(700 780)" data-tip="盖碗茶|刮一刮，抿一口">
+    <path d="M-34 0 H34 L26 34 H-26 Z" fill="#fbf8f0" stroke="${INK}" stroke-width="4"/><path d="M-30 6 H30" stroke="#2f5d8a" stroke-width="5"/>
+    <g class="xl-lid"><path d="M-38 -2 Q0 -26 38 -2 Z" fill="#fbf8f0" stroke="${INK}" stroke-width="4"/><circle cx="0" cy="-16" r="6" fill="#2f5d8a" stroke="${INK}" stroke-width="2"/></g>
+    <ellipse cx="0" cy="38" rx="44" ry="7" fill="#fbf8f0" stroke="${INK}" stroke-width="3"/>
+    <g class="xl-tsteam">${[-12, 12].map(x => `<path d="M${x} -30 q-8 -14 0 -28 q8 -14 0 -26" fill="none" stroke="#fffaf0" stroke-width="5" stroke-linecap="round"/>`).join('')}</g>
+    <rect x="-48" y="-60" width="96" height="104" fill="transparent"/></g>
+  <g class="lf-item xl-seed" data-k="seed" transform="translate(900 790)" data-tip="瓜子|嗑一个，听一段">
+    <ellipse cx="0" cy="14" rx="56" ry="14" fill="#c9a227" stroke="${INK}" stroke-width="4"/>
+    ${[-30,-14,2,18,32,-22,10].map((x, i) => `<ellipse class="xl-s${i}" cx="${x}" cy="${4 - (i > 4 ? 10 : 0)}" rx="8" ry="5" fill="#2b2724" transform="rotate(${i * 26} ${x} 4)"/>`).join('')}
+    <g class="xl-shell"><ellipse cx="-6" cy="-30" rx="7" ry="4" fill="#2b2724"/><ellipse cx="8" cy="-34" rx="7" ry="4" fill="#2b2724"/></g>
+    <rect x="-60" y="-40" width="120" height="70" fill="transparent"/></g>
+  <!-- 叫好的看客（剪影） -->
+  <g class="xl-crowd">${[180, 420, 620, 980, 1180, 1420].map((x, i) => `<g class="xl-fan xl-f${i}" transform="translate(${x} 900)"><circle cx="0" cy="-130" r="34" fill="#241914"/><path d="M-56 0 Q-56 -90 0 -96 Q56 -90 56 0 Z" fill="#241914"/>
+    <path class="xl-hand" d="M30 -80 L64 -150" stroke="#241914" stroke-width="16" stroke-linecap="round"/></g>`).join('')}</g>
+  <!-- “好！”字 -->
+  <g class="xl-hao" transform="translate(800 260)" opacity="0"><text text-anchor="middle" font-size="120" fill="#e0ad3a" stroke="${INK}" stroke-width="4" font-family="YRTitle,serif">好！</text></g>
+  <g class="xl-petals"></g>
+</svg>`;
+}
+export function openOpera({ onSeal, sealed }) {
+  const S = shell({ kicker: '戏楼 · 18:00', title: '听 一 出 戏', svg: operaSVG(), hint: '点幕布，开锣', goText: '叫好！', bubbleAt: [800, 230], cls: 'lf-opera' });
+  // 台下换脸谱的小圆牌
+  const chips = el('div', 'pg-chips xl-chips', Object.entries(XL_FACES).map(([k, f]) =>
+    `<button class="pg-chip xl-chip${k === 'red' ? ' on' : ''}" data-k="${k}" title="${f.name}"><svg viewBox="-60 -90 120 170" width="30" height="40">${xlFace(f)}</svg></button>`).join(''));
+  S.root.querySelector('.lf-bar').prepend(chips);
+  chips.style.visibility = 'hidden';
+  const actor = S.q('.xl-actor'), faceG = S.q('.xl-face'), beard = S.q('.xl-beard'), hao = S.q('.xl-hao');
+  let open = false, cur = 'red', window_ = false, goods = 0, seen = new Set(['red']), loopT = 0, disposed = false;
+  S.onClose = () => { disposed = true; clearTimeout(loopT); };
+
+  function setFace(k) {
+    cur = k; const f = XL_FACES[k];
+    actor.classList.remove('turn'); void actor.getBBox(); actor.classList.add('turn');
+    sfx('gong');
+    setTimeout(() => { faceG.innerHTML = xlFace(f); beard.style.display = k === 'white' ? 'none' : ''; }, 260);
+    chips.querySelectorAll('.xl-chip').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+    S.say(f.line, 2400);
+    seen.add(k);
+  }
+  chips.querySelectorAll('.xl-chip').forEach(b => b.onclick = () => { if (open) setFace(b.dataset.k); });
+
+  // 角儿的节奏：走两步 → 甩袖 → 亮相（金圈亮起时叫好才算“叫在点上”）
+  function cycle() {
+    if (disposed || !open) return;
+    actor.classList.remove('liang', 'walk', 'sleeve');
+    actor.classList.add('walk');
+    [0, 1, 2].forEach(i => setTimeout(() => !disposed && sfx('clack'), 400 + i * 380));
+    loopT = setTimeout(() => {
+      actor.classList.remove('walk'); actor.classList.add('sleeve'); sfx('xiao');
+      loopT = setTimeout(() => {
+        actor.classList.remove('sleeve'); actor.classList.add('liang'); sfx('gong'); window_ = true;
+        S.hint('亮相了——快叫好！');
+        loopT = setTimeout(() => { window_ = false; actor.classList.remove('liang'); S.hint(goods >= 3 ? '换张脸谱，再看一遍' : '等他亮相，再叫好'); loopT = setTimeout(cycle, 900); }, 1700);
+      }, 1100);
+    }, 1600);
+  }
+  S.q('.xl-curtain').addEventListener('click', () => {
+    if (open) return; open = true;
+    S.root.classList.add('xl-open'); sfx('gong'); setTimeout(() => sfx('gong'), 380);
+    [0, 1, 2, 3].forEach(i => setTimeout(() => sfx('clack'), 700 + i * 160));
+    S.hint('等他亮相，再叫好'); chips.style.visibility = '';
+    S.go.disabled = false;
+    setTimeout(cycle, 1500);
+  });
+  S.go.onclick = () => {
+    if (!open) return;
+    const fans = S.qa('.xl-fan');
+    if (window_) {
+      window_ = false; goods++;
+      hao.classList.remove('show'); void hao.getBBox(); hao.classList.add('show');
+      fans.forEach((f, i) => setTimeout(() => S.pulse(f, 900), i * 60));
+      sfx('hao'); setTimeout(() => sfx('hao'), 120); sfx('coin');
+      petals();
+      if (goods === 1) S.say('叫在点儿上！懂戏！', 2200, [800, 760]);
+      if (goods >= 3 && seen.size >= 2 && !sealed()) setTimeout(() => S.stamp('戏', onSeal), 900);
+      else if (goods >= 3 && seen.size < 2) S.hint('换张脸谱试试——点下面的小脸');
+    } else {
+      S.pulse(fans[2], 700); sfx('drop');
+      S.say('嘘——还没到时候', 1600, [800, 760]);
+    }
+  };
+  function petals() {
+    const g = S.q('.xl-petals');
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElementNS(NS, 'path');
+      const x = rnd(420, 1180);
+      p.setAttribute('d', `M${x} 200 q6 -10 12 0 q-6 10 -12 0z`);
+      p.setAttribute('fill', ['#c23a2b', '#e0ad3a', '#fbf8f0'][i % 3]);
+      g.appendChild(p);
+      p.animate([{ transform: 'translate(0,0) rotate(0deg)', opacity: 1 }, { transform: `translate(${rnd(-60, 60)}px, ${rnd(380, 480)}px) rotate(${rnd(-300, 300)}deg)`, opacity: 0 }],
+        { duration: rnd(1600, 2400), easing: 'ease-in', delay: i * 40 }).onfinish = () => p.remove();
+    }
+  }
+  // 台口 / 台下小物件
+  const tap = (k, f) => S.q(`[data-k="${k}"]`).addEventListener('click', e => { e.stopPropagation(); S.pulse(e.currentTarget, 1200); f(); });
+  tap('gong', () => sfx('gong'));
+  tap('drum', () => [0, 1, 2, 3, 4].forEach(i => setTimeout(() => sfx('clack'), i * 110)));
+  tap('tea', () => { sfx('bead'); setTimeout(() => sfx('bead'), 200); });
+  tap('seed', () => { sfx('clack'); setTimeout(() => sfx('pop'), 140); });
+  return S;
+}

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { initMaohou, initKite, initMask } from './games.js';
 import { updateAmbient, setSound, soundOn, soundPref } from './audio.js';
-import { openBreakfast, openPigeon, openStore } from './life.js';
+import { openBreakfast, openPigeon, openStore, openOpera } from './life.js';
 /* 一日一巷 · 胡同里的时间遗产
  * 一张胡同图，滚动 = 时间流逝；镜头沿胡同由东（晨）向西（夜）飞行，换光不换图。
  */
@@ -58,7 +58,7 @@ const SPOTS = [
   { id: 'pigeon', x: .3, y: .7, from: 5, to: 18, label: '鸽哨 · 让鸽子摆字', life: 'pigeon',
     kicker: '胡同上空', title: '鸽哨',
     text: ['“嗡——”一群鸽子掠过屋脊，鸽哨在风里响。这是老北京天空的声音。'] },
-  { id: 'opera', x: .12, y: .4, from: 16, to: 21, label: '戏楼', img: 'opera',
+  { id: 'opera', x: .12, y: .4, from: 16, to: 21, label: '戏楼 · 听一出', img: 'opera', life: 'opera',
     kicker: '黄昏 · 18:00', title: '戏楼',
     text: ['夕阳斜照在飞檐上，后台已经开始上妆。锣鼓、京胡、水袖——一出戏，要从傍晚唱到掌灯。',
            '<span class="tag">锣鼓</span><span class="tag">京胡</span><span class="tag">水袖</span>'] },
@@ -264,6 +264,7 @@ function openSpot(s) {
   if (s.finale) return openFinale();
   if (s.life === 'breakfast') return openBreakfast({ sealed: () => lifeSeals.has('早'), onSeal: () => { lifeSeals.add('早'); } });
   if (s.life === 'pigeon') return openPigeon({ sealed: () => lifeSeals.has('鸽'), onSeal: () => { lifeSeals.add('鸽'); } });
+  if (s.life === 'opera') return openOpera({ sealed: () => lifeSeals.has('戏'), onSeal: () => { lifeSeals.add('戏'); } });
   if (s.life === 'store') return openStore({ sealed: () => lifeSeals.has('铺'), onSeal: () => { lifeSeals.add('铺'); } });
   $('#panelKicker').textContent = s.kicker;
   $('#panelTitle').textContent = s.title;
