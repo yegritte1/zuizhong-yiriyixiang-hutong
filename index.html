@@ -35,11 +35,23 @@
     <span>05:30</span><i></i><span>拂晓 · 东城某胡同</span>
   </div>
 
-  <button class="intro-enter" id="enterBtn">
-    <span class="enter-txt">天快亮了，推门往里走</span>
-    <span class="enter-line"></span>
-    <small>轻滑 · 点击</small>
-  </button>
+  <div class="intro-actions">
+    <button class="intro-vid-btn" id="introVidBtn" type="button" title="观赏25秒胡同序幕导览片">
+      <span class="vid-play-icon">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+      <span class="vid-btn-text">
+        <b>观赏序幕片 · 晨光入巷</b>
+        <small>AIGC 导览 · 25 秒</small>
+      </span>
+    </button>
+
+    <button class="intro-enter" id="enterBtn" type="button">
+      <span class="enter-txt">天快亮了，推门往里走</span>
+      <span class="enter-line"></span>
+      <small>直接漫游 · 轻滑 / 点击</small>
+    </button>
+  </div>
 
 </section>
 
@@ -141,6 +153,33 @@
     <div class="finale-actions">
       <button class="btn" id="againBtn">从清晨再走一遍</button>
       <button class="btn ghost" id="finaleClose">留在夜里</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============ 视频放映厅 ============ -->
+<section id="videoModal" class="vid-modal" aria-hidden="true">
+  <div class="vid-backdrop"></div>
+  <div class="vid-dialog">
+    <div class="vid-header">
+      <div class="vid-meta">
+        <span class="vid-badge">序章短片</span>
+        <h3 class="vid-title">《晨光入巷》</h3>
+        <span class="vid-dur">25 秒</span>
+      </div>
+      <button class="vid-skip-btn" id="vidSkipBtn" type="button">跳过，进入漫游 <span>→</span></button>
+    </div>
+    <div class="vid-frame">
+      <video id="introVideo" preload="auto" poster="./video/v1_poster.jpg" playsinline controls>
+        <source src="./video/v1_intro.mp4" type="video/mp4" />
+      </video>
+    </div>
+    <div class="vid-footer">
+      <p class="vid-sub">“北京的胡同是这座城最细的血管，从元大都算起，装着一户户人家的日子……”</p>
+      <div class="vid-actions">
+        <button class="vid-enter-btn" id="vidEnterBtn" type="button">看完进入漫游 <span>→</span></button>
+      </div>
     </div>
   </div>
 </section>

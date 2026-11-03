@@ -198,3 +198,11 @@ document.addEventListener('visibilitychange', () => {
   if (!ctx || !enabled) return;
   if (document.hidden) { bgmEl.pause(); ctx.suspend(); } else { ctx.resume(); bgmEl.play().catch(() => {}); }
 });
+
+export function duckBgm(duck = true) {
+  if (!bgmG || !ctx) return;
+  const t = ctx.currentTime;
+  bgmG.gain.cancelScheduledValues(t);
+  bgmG.gain.setValueAtTime(bgmG.gain.value, t);
+  bgmG.gain.linearRampToValueAtTime(duck ? 0 : BGM_VOL, t + .35);
+}

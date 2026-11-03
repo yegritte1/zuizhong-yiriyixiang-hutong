@@ -639,7 +639,7 @@ export function initScene(canvas) {
   /* ---------- 锚点（热点 3D 位置） ---------- */
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
   const anchors = {
-    breakfast: V(95, 2.6, 7), store: V(108, 4.4, -4), maohou: V(84, 1.6, -15), yard: V(1.5, 4.2, -14),
+    awakening: V(115, 3.5, 0), breakfast: V(95, 2.6, 7), store: V(108, 4.4, -4), maohou: V(84, 1.6, -15), yard: V(1.5, 4.2, -14),
     kite: V(-28, 15.5, 13), pigeon: V(40, 27, 0), opera: V(-90, 8, 9), mask: V(-104, 3, 12), gate: V(-20.6, 2.2, -2)
   };
 

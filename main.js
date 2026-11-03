@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { initMaohou, initKite, initMask } from './games.js';
-import { updateAmbient, setSound, soundOn, soundPref } from './audio.js';
+import { updateAmbient, setSound, soundOn, soundPref, duckBgm } from './audio.js';
 import { openBreakfast, openPigeon, openStore, openOpera, openYard } from './life.js';
 /* 一日一巷 · 胡同里的时间遗产
  * 一张胡同图，滚动 = 时间流逝；镜头沿胡同由东（晨）向西（夜）飞行，换光不换图。
@@ -31,6 +31,12 @@ const N = STOPS.length;
 
 /* ---------------- 热点 ---------------- */
 const SPOTS = [
+  { id: 'awakening', x: .86, y: .46, from: 5, to: 7.5, label: '导览 · 晨光入巷',
+    kicker: '序章 · 05:30', title: '晨光入巷',
+    text: ['“北京的胡同是这座城最细的血管，从元大都算起，装着一户户人家的日子……”',
+           '晨光初现，炊烟与鸽哨唤醒了老城。戴上耳机，跟随光影漫步一日胡同。',
+           '<span class="tag">序幕导览</span><span class="tag">25秒短片</span>'],
+    video: 'intro' },
   { id: 'breakfast', x: .78, y: .63, from: 5, to: 11, label: '早点摊 · 挑份早饭', img: 'breakfast', life: 'breakfast',
     kicker: '清晨 · 06:45', title: '早点摊',
     text: ['天还没亮透，胡同口的蒸笼已经冒气了。豆汁儿、焦圈、炸油条、糖葫芦——北京人的一天，从一碗热乎的开始。',
@@ -273,6 +279,12 @@ function openSpot(s) {
   // 配图：直接截取当前 3D 画面里这个热点周围的一块，和场景风格统一
   snapSpot = s;
   const act = $('#panelActions'); act.innerHTML = '';
+  if (s.video === 'intro') {
+    const v = document.createElement('button'); v.className = 'btn';
+    v.textContent = '🎬 观赏《晨光入巷》导览短片 (25s)';
+    v.onclick = () => { closePanel(); openIntroVideo(); };
+    act.appendChild(v);
+  }
   if (s.game) {
     const g = document.createElement('button'); g.className = 'btn';
     g.textContent = { maohou: '捏一只立体毛猴', kite: '绘一只沙燕 · 放上天', mask: '对镜勾脸谱（可用摄像头）' }[s.game];
@@ -288,7 +300,7 @@ function closePanel() { $('#panel').classList.remove('open'); }
 let snapSpot = null;
 const snapCv = document.createElement('canvas');
 function takeSnap(s) {
-  const gl = $('#gl'), p = S3.project(S3.anchors[s.id]);
+  const gl = $('#gl'), anch = (S3.anchors && S3.anchors[s.id]) || new THREE.Vector3(0, 3, 0), p = S3.project(anch);
   const sx = gl.width / innerWidth, W = Math.min(gl.width, 760 * sx), H = W * 9 / 16;
   const cx = clamp(p.x * sx - W / 2, 0, gl.width - W), cy = clamp(p.y * sx - H * .55, 0, gl.height - H);
   snapCv.width = 760; snapCv.height = 428;
@@ -407,14 +419,74 @@ function enter() {
   setTimeout(finishIntro, ENTER_MS + 900);      // 兜底：无论如何都会进入
   if (soundPref()) { setSound(true); paintSound(); }   // 首次交互即开声（浏览器要求用户手势）
 }
+// 视频放映厅控制
+const vidModal = $('#videoModal');
+const introVidBtn = $('#introVidBtn');
+const introVideo = $('#introVideo');
+const vidSkipBtn = $('#vidSkipBtn');
+const vidEnterBtn = $('#vidEnterBtn');
+
+function openIntroVideo() {
+  if (!vidModal || !introVideo) return;
+  vidModal.classList.add('open');
+  vidModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+  duckBgm(true);
+  try {
+    introVideo.currentTime = 0;
+    introVideo.play().catch(() => {});
+  } catch (e) {}
+}
+
+function closeIntroVideo(andEnter = false) {
+  if (!vidModal || !introVideo) return;
+  introVideo.pause();
+  vidModal.classList.remove('open');
+  vidModal.setAttribute('aria-hidden', 'true');
+  duckBgm(false);
+  if (andEnter) {
+    if (introAlive) enter();
+    else document.body.classList.remove('locked');
+  } else {
+    if (!introAlive) document.body.classList.remove('locked');
+  }
+}
+
+if (introVidBtn) {
+  introVidBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    openIntroVideo();
+  });
+  introVidBtn.addEventListener('pointerdown', e => e.stopPropagation());
+}
+if (vidSkipBtn) vidSkipBtn.addEventListener('click', () => closeIntroVideo(true));
+if (vidEnterBtn) vidEnterBtn.addEventListener('click', () => closeIntroVideo(true));
+if (introVideo) {
+  introVideo.addEventListener('ended', () => {
+    setTimeout(() => closeIntroVideo(true), 600);
+  });
+}
+window.__openIntroVideo = openIntroVideo;
+
 // 轻轻一滑 / 一点 / 任意键就进入
 intro.addEventListener('wheel', e => { e.preventDefault(); if (Math.abs(e.deltaY) + Math.abs(e.deltaX) > 2) { peekP = .04; enter(); } }, { passive: false });
 let ty0 = null;
 intro.addEventListener('touchstart', e => { ty0 = e.touches[0].clientY; }, { passive: true });
 intro.addEventListener('touchmove', e => { if (ty0 !== null && Math.abs(ty0 - e.touches[0].clientY) > 12) enter(); }, { passive: true });
-intro.addEventListener('pointerdown', enter);
-intro.addEventListener('click', enter);
-addEventListener('keydown', e => { if (intro.isConnected && !entering) enter(); });
+intro.addEventListener('pointerdown', e => {
+  if (e.target.closest('#introVidBtn, .intro-vid-btn, #videoModal, .vid-modal')) return;
+});
+intro.addEventListener('click', e => {
+  if (e.target.closest('#introVidBtn, .intro-vid-btn, #videoModal, .vid-modal')) return;
+  enter();
+});
+addEventListener('keydown', e => {
+  if (vidModal && vidModal.classList.contains('open')) {
+    if (e.key === 'Escape') closeIntroVideo(false);
+    return;
+  }
+  if (intro.isConnected && !entering) enter();
+});
 // 首页鸽群
 (function introBirds() {
   if (!intro.isConnected) return;
