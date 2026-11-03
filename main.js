@@ -141,7 +141,7 @@ addEventListener('scroll', () => { target = clamp(scrollY / maxScroll()) * (N - 
 addEventListener('mousemove', e => { mouseX = e.clientX / innerWidth - .5; mouseY = e.clientY / innerHeight - .5; });
 function goTo(i) { overview = false; scrollTo({ top: i / (N - 1) * maxScroll(), behavior: 'smooth' }); }
 /* 一滑一站：滚轮/触控板/滑动一次就飞到下一个时间点，不用使劲滚 */
-let snapLock = 0, wAcc = 0, wT = 0;
+let snapLock = 0, wAcc = 0, wT = 0, wheelConsumed = false;
 const curStop = () => Math.round(clamp(scrollY / maxScroll()) * (N - 1));
 const blocked = e => !introAlive && (document.body.classList.contains('locked') || (e && e.target.closest && e.target.closest('#panel,#game,#menu,#finale')));
 function step(d) {
@@ -152,9 +152,17 @@ function step(d) {
 addEventListener('wheel', e => {
   if (introAlive || blocked(e)) return;
   e.preventDefault();
-  const now = performance.now(); if (now - wT > 250) wAcc = 0; wT = now;
+  const now = performance.now();
+  // 惯性尾部也属于同一次手势；只有连续安静 350ms 才允许下一次滑动。
+  if (now - wT > 350) { wAcc = 0; wheelConsumed = false; }
+  wT = now;
+  if (wheelConsumed) return;
   wAcc += e.deltaY;
-  if (Math.abs(wAcc) > 25) { step(Math.sign(wAcc)); wAcc = 0; }
+  if (Math.abs(wAcc) > 25) {
+    wheelConsumed = true;
+    step(Math.sign(wAcc));
+    wAcc = 0;
+  }
 }, { passive: false });
 let sy0 = null;
 addEventListener('touchstart', e => { sy0 = e.touches[0].clientY; }, { passive: true });
@@ -163,12 +171,6 @@ addEventListener('touchend', e => { if (sy0 === null || introAlive || blocked(e)
 addEventListener('keydown', e => { if (introAlive || blocked()) return;
   if (['ArrowDown', 'PageDown', ' ', 'ArrowRight'].includes(e.key)) { e.preventDefault(); step(1); }
   if (['ArrowUp', 'PageUp', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); step(-1); } });
-addEventListener('keydown', e => {
-  if (document.body.classList.contains('locked')) return;
-  const cur = Math.round(prog);
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(Math.min(N - 1, cur + 1)); }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(Math.max(0, cur - 1)); }
-});
 
 // 每段之间：前 18% 和后 18% 停留在节点上，中间飞行
 function segEase(p) {
