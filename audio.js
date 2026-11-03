@@ -177,7 +177,7 @@ export function updateAmbient(h, dt = .016) {
   const tgtG = h < 7 ? .018 : h < 20 ? .012 : .01;
   // 戏楼锣鼓时段音乐稍让一让，深夜音乐放轻
   const tgtB = (h > 17.2 && h < 20.6 ? .48 : h > 21 ? .5 : 1) * BGM_VOL;
-  bgmG.gain.value += (tgtB - bgmG.gain.value) * .02;
+  if (!ducking) bgmG.gain.value += (tgtB - bgmG.gain.value) * .02;
 }
 export function setSound(on) {
   enabled = on;
@@ -199,10 +199,13 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) { bgmEl.pause(); ctx.suspend(); } else { ctx.resume(); bgmEl.play().catch(() => {}); }
 });
 
+let ducking = false;
 export function duckBgm(duck = true) {
   if (!bgmG || !ctx) return;
+  ducking = duck;
   const t = ctx.currentTime;
   bgmG.gain.cancelScheduledValues(t);
   bgmG.gain.setValueAtTime(bgmG.gain.value, t);
-  bgmG.gain.linearRampToValueAtTime(duck ? 0 : BGM_VOL, t + .35);
+  bgmG.gain.linearRampToValueAtTime(duck ? 0 : BGM_VOL, t + .25);
 }
+export function isDucked() { return ducking; }
