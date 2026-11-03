@@ -20,9 +20,9 @@ const MAP_W = 6336, MAP_H = 2688;
 const STOPS = [
   { h: 5.5,  label: '拂晓', name: '胡同苏醒', sub: '鸽哨划过灰瓦，胡同从东头醒来', cx: .86, cy: .5,  z: 1.0 },
   { h: 6,    label: '清晨', name: '放鸽子',   sub: '迎着晨光，看鸽群掠过灰瓦屋脊', cx: .3, cy: .74, z: 2.2 },
-  { h: 6.75, label: '清晨', name: '早点摊',   sub: '蒸笼掀开，豆汁焦圈的热气',     cx: .79, cy: .6,  z: 2.2 },
-  { h: 7.5,  label: '清晨', name: '小卖部',   sub: '玻璃柜台前，挑一份童年的零嘴', cx: .91, cy: .62, z: 2.2 },
-  { h: 8.5,  label: '清晨', name: '毛猴',     sub: '蝉蜕与辛夷，捏出一个市井北京', cx: .66, cy: .55, z: 2.3 },
+  { h: 6.75, label: '早间', name: '早点摊',   sub: '蒸笼掀开，豆汁焦圈的热气',     cx: .79, cy: .6,  z: 2.2 },
+  { h: 7.5,  label: '早上', name: '小卖部',   sub: '玻璃柜台前，挑一份童年的零嘴', cx: .91, cy: .62, z: 2.2 },
+  { h: 8.5,  label: '上午', name: '毛猴',     sub: '蝉蜕与辛夷，捏出一个市井北京', cx: .66, cy: .55, z: 2.3 },
   { h: 12,   label: '正午', name: '四合院',   sub: '槐荫、鸟笼、空竹声',           cx: .5,  cy: .54, z: 1.9 },
   { h: 15,   label: '午后', name: '沙燕',     sub: '一只风筝，飞在院墙之上',       cx: .35, cy: .45, z: 2.0 },
   { h: 18,   label: '黄昏', name: '戏楼',     sub: '锣鼓点起，夕阳落在飞檐',       cx: .13, cy: .45, z: 2.1 },
@@ -34,15 +34,15 @@ const N = STOPS.length;
 /* ---------------- 热点 ---------------- */
 const SPOTS = [
   { id: 'breakfast', x: .78, y: .63, from: 5, to: 11, label: '早点摊 · 挑份早饭', img: 'breakfast', life: 'breakfast',
-    kicker: '清晨 · 06:45', title: '早点摊',
+    kicker: '早间 · 06:45', title: '早点摊',
     text: ['天还没亮透，胡同口的蒸笼已经冒气了。豆汁儿、焦圈、炸油条、糖葫芦——北京人的一天，从一碗热乎的开始。',
            '<span class="tag">豆汁儿</span><span class="tag">焦圈</span><span class="tag">糖葫芦</span><span class="tag">吆喝声</span>'] },
   { id: 'store', x: .91, y: .62, from: 5, to: 24, label: '小卖部 · 挑点零嘴', life: 'store',
-    kicker: '清晨 · 07:30', title: '小卖部',
+    kicker: '早上 · 07:30', title: '小卖部',
     text: ['玻璃柜里的北冰洋、大白兔、弹球和沙包，是几代胡同孩子共同的记忆。',
            '<span class="tag">北冰洋</span><span class="tag">弹球</span><span class="tag">沙包</span>'] },
   { id: 'maohou', x: .65, y: .55, from: 7, to: 11, heritage: true, label: '非遗 · 北京毛猴', img: 'maohou',
-    kicker: '非遗 · 清晨 08:30', title: '北京毛猴',
+    kicker: '非遗 · 上午 08:30', title: '北京毛猴',
     text: ['毛猴起源于清末北京，以蝉蜕为头和四肢、辛夷（玉兰花骨朵）为身子，用白芨胶粘合而成。',
            '小小一只毛猴，拉洋车、卖糖葫芦、剃头、说书……把老北京的市井百态全装进了方寸之间。',
            '<span class="tag">蝉蜕</span><span class="tag">辛夷</span><span class="tag">白芨</span>'],
@@ -236,16 +236,15 @@ function frame(now) {
     const a = S3.anchors[s.id];
     const on = (h >= s.from && h <= s.to) || ovT > .5;
     const p = S3.project(a);
-    // 鸽群锚点可能在镜头外；其入口固定在左侧安全区域，不再随投影消失。
+    // 鸽子入口跟随鸽群锚点：不在画面内时隐藏，不再固定在屏幕左侧。
     const pigeon = s.id === 'pigeon';
-    const show = on && (pigeon || (p.visible && p.depth < 260)) && !introAlive;
+    const show = on && p.visible && p.depth < 260 && !introAlive;
     s.el.classList.toggle('hidden', !show);
-    // 屏幕微调：避开章节大字等画面元素
-    s.el.style.left = (pigeon ? Math.max(32, innerWidth * .08) : p.x + (s.dx || 0)) + 'px';
-    s.el.style.top = (pigeon ? innerHeight * .5 : p.y + (s.dy || 0)) + 'px';
-    // 鸽哨入口标签朝右，其余标签按屏幕位置选边。
-    s.el.classList.toggle('flip', !pigeon && p.x > innerWidth * .42);
-    s.el.classList.toggle('near', show && (pigeon || (atStop && p.depth < 60)));
+    s.el.style.left = (p.x + (pigeon ? 0 : (s.dx || 0))) + 'px';
+    s.el.style.top = (p.y + (pigeon ? 0 : (s.dy || 0))) + 'px';
+    // 沙燕标签固定朝右，避免与中央章节标题重叠。
+    s.el.classList.toggle('flip', !pigeon && s.id !== 'kite' && p.x > innerWidth * .42);
+    s.el.classList.toggle('near', show && atStop && p.depth < 80);
   });
 
   requestAnimationFrame(frame);
