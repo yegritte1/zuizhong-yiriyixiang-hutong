@@ -192,7 +192,7 @@ export function initMaohou(body, ui) {
   const wrap = el('div', 'mh3d'); body.appendChild(wrap);
   const cv = el('canvas'); wrap.appendChild(cv);
   const side = el('div', 'mh-side'); wrap.appendChild(side);
-  refCard(body, './img/ref/maohou_ref.jpg', '毛猴的原料：蝉蜕与辛夷', '毛猴技艺视频截图 · 中国新闻社 · Wikimedia Commons · CC BY 3.0');
+  refCard(body, './img/ref/maohou_ref.jpg', '毛猴作品《胡服骑射》', '毛猴技艺视频截图 · 中国新闻社 · Wikimedia Commons · CC BY 3.0');
 
   const W = () => wrap.clientWidth, H = () => wrap.clientHeight;
   const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
