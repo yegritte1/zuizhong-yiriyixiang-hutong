@@ -7,7 +7,7 @@
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-@font-face{font-family:"YRTitle";src:url("./fonts/title.woff2") format("woff2");font-display:swap}
+@font-face{font-family:"YRTitle";src:url("./fonts/title.woff2?v=2") format("woff2");font-display:swap}
 html,body{background:var(--paper);color:var(--ink);font-family:var(--serif);-webkit-font-smoothing:antialiased}
 body.locked{overflow:hidden}
 button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
