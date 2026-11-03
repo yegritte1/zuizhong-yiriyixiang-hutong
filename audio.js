@@ -5,7 +5,7 @@
  */
 let ctx = null, master = null, dry = null, wet = null, windG = null, windF = null;
 let bgmEl = null, bgmG = null, sfxBus = null;
-const BGM_VOL = .62, SFX_VOL = .38;   // 音乐为主，音效是点缀
+const BGM_VOL = .55, SFX_VOL = .32;   // 音乐为主，音效是点缀
 let enabled = false;
 const next = {};
 const rnd = (a, b) => a + Math.random() * (b - a);
@@ -23,16 +23,16 @@ function init() {
   sfxBus = ctx.createGain(); sfxBus.gain.value = SFX_VOL; sfxBus.connect(comp); comp.connect(master);
   dry = ctx.createGain(); dry.gain.value = 1; dry.connect(sfxBus);
   // 院落混响：生成一段衰减噪声作为脉冲响应
-  const len = ctx.sampleRate * 2.6, ir = ctx.createBuffer(2, len, ctx.sampleRate);
-  for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
-  const conv = ctx.createConvolver(); conv.buffer = ir;
-  wet = ctx.createGain(); wet.gain.value = .22; wet.connect(conv); conv.connect(sfxBus);
+  const delay = ctx.createDelay(); delay.delayTime.value = .12;
+  const feed = ctx.createGain(); feed.gain.value = .35;
+  delay.connect(feed); feed.connect(delay);
+  wet = ctx.createGain(); wet.gain.value = .15; wet.connect(delay); delay.connect(sfxBus);
   // 底噪：胡同里的风
   const nb = ctx.createBuffer(1, ctx.sampleRate * 4, ctx.sampleRate), nd = nb.getChannelData(0);
   let b0 = 0; for (let i = 0; i < nd.length; i++) { b0 = .985 * b0 + .015 * (Math.random() * 2 - 1); nd[i] = b0 * 6; }
   const ns = ctx.createBufferSource(); ns.buffer = nb; ns.loop = true;
   windF = ctx.createBiquadFilter(); windF.type = 'lowpass'; windF.frequency.value = 500;
-  windG = ctx.createGain(); windG.gain.value = .015;
+  windG = ctx.createGain(); windG.gain.value = 0;
   // 风声底噪已去掉（听感像电流“滋啦”声）
 }
 function out(gain, pan = 0, wetAmt = .3) {
@@ -108,8 +108,8 @@ function birds() {
   let t = ctx.currentTime;
   for (let i = 0; i < n; i++) {
     const os = ctx.createOscillator(), g = ctx.createGain(), d = rnd(.05, .11);
-    os.frequency.setValueAtTime(base, t); os.frequency.exponentialRampToValueAtTime(base * rnd(1.25, 1.5), t + d);
-    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(1, t + .01); g.gain.exponentialRampToValueAtTime(.001, t + d);
+    os.frequency.setValueAtTime(base, t); os.frequency.linearRampToValueAtTime(base * rnd(1.1, 1.3), t + d);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.6, t + .015); g.gain.exponentialRampToValueAtTime(.001, t + d);
     os.connect(g); g.connect(o.g); os.start(t); os.stop(t + d + .02);
     t += d + rnd(.04, .12);
   }
@@ -162,9 +162,10 @@ function cricket() {
 /* ---------- 调度：按时辰安排 ---------- */
 const PLAN = [
   // [声音, 起始时刻, 结束时刻, 最短间隔, 最长间隔]
-  [pigeonWhistle, 10, 16, 24, 36],
-  [birds, 6.8, 17.6, 3, 7],
-  [kongzhu, 10.2, 16.5, 8, 13],
+  [birds, 5.5, 9, 8, 15], // 凌晨鸟鸣
+  [birds, 10, 16, 12, 18], // 鸽哨替换为柔和鸟鸣
+  [birds, 6.8, 17.6, 2.5, 6],   // 空竹（嗡嗡的电流感）已去掉，改为更多鸟鸣
+  [birds, 10.5, 16.5, 4, 9],
   [luogu, 17.2, 20.6, 14, 20],
   [cricket, 20, 25, .8, 2.2]
 ];

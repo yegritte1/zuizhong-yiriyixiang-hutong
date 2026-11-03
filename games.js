@@ -35,15 +35,7 @@ function drum() {
     s.connect(f); f.connect(g); g.connect(a.destination); s.start(t);
   } catch (e) {}
 }
-function whoosh(v) {
-  try {
-    const a = ac(), t = a.currentTime, len = a.sampleRate * .6, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(i / len * Math.PI);
-    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
-    s.buffer = buf; f.type = 'bandpass'; f.frequency.value = 500 + v * 600; g.gain.value = .06 * v;
-    s.connect(f); f.connect(g); g.connect(a.destination); s.start(t);
-  } catch (e) {}
-}
+function whoosh() { /* 风声噪音已去掉（听感刺耳） */ }
 
 /* 参考资料小卡（真实图片 + 出处） */
 function refCard(body, src, title, credit) {

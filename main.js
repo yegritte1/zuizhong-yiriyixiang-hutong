@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { initScene } from './scene.js';
 import { initMaohou, initKite, initMask } from './games.js';
 import { updateAmbient, setSound, soundOn, soundPref } from './audio.js';
-import { openBreakfast } from './life.js';
+import { openBreakfast, openPigeon, openStore } from './life.js';
 /* 一日一巷 · 胡同里的时间遗产
  * 一张胡同图，滚动 = 时间流逝；镜头沿胡同由东（晨）向西（夜）飞行，换光不换图。
  */
@@ -35,7 +35,7 @@ const SPOTS = [
     kicker: '清晨 · 06:45', title: '早点摊',
     text: ['天还没亮透，胡同口的蒸笼已经冒气了。豆汁儿、焦圈、炸油条、糖葫芦——北京人的一天，从一碗热乎的开始。',
            '<span class="tag">豆汁儿</span><span class="tag">焦圈</span><span class="tag">糖葫芦</span><span class="tag">吆喝声</span>'] },
-  { id: 'store', x: .91, y: .62, from: 5, to: 24, label: '小卖部',
+  { id: 'store', x: .91, y: .62, from: 5, to: 24, label: '小卖部 · 挑点零嘴', life: 'store',
     kicker: '胡同口 · 全天', title: '小卖部',
     text: ['玻璃柜里的北冰洋、大白兔、弹球和沙包，是几代胡同孩子共同的记忆。',
            '<span class="tag">北冰洋</span><span class="tag">弹球</span><span class="tag">沙包</span>'] },
@@ -55,7 +55,7 @@ const SPOTS = [
            '扎、糊、绘、放，号称风筝四艺。绘的时候讲究对称、色彩浓烈，蝙蝠、寿桃、牡丹都是常见纹样。',
            '<span class="tag">扎</span><span class="tag">糊</span><span class="tag">绘</span><span class="tag">放</span>'],
     game: 'kite' },
-  { id: 'pigeon', x: .3, y: .7, from: 5, to: 18, label: '鸽哨',
+  { id: 'pigeon', x: .3, y: .7, from: 5, to: 18, label: '鸽哨 · 让鸽子摆字', life: 'pigeon',
     kicker: '胡同上空', title: '鸽哨',
     text: ['“嗡——”一群鸽子掠过屋脊，鸽哨在风里响。这是老北京天空的声音。'] },
   { id: 'opera', x: .12, y: .4, from: 16, to: 21, label: '戏楼', img: 'opera',
@@ -263,6 +263,8 @@ const lifeSeals = new Set();   // 胡同小印（生活场景）
 function openSpot(s) {
   if (s.finale) return openFinale();
   if (s.life === 'breakfast') return openBreakfast({ sealed: () => lifeSeals.has('早'), onSeal: () => { lifeSeals.add('早'); } });
+  if (s.life === 'pigeon') return openPigeon({ sealed: () => lifeSeals.has('鸽'), onSeal: () => { lifeSeals.add('鸽'); } });
+  if (s.life === 'store') return openStore({ sealed: () => lifeSeals.has('铺'), onSeal: () => { lifeSeals.add('铺'); } });
   $('#panelKicker').textContent = s.kicker;
   $('#panelTitle').textContent = s.title;
   $('#panelText').innerHTML = s.text.map(t => `<p>${t}</p>`).join('');
