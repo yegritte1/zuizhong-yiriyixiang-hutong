@@ -234,14 +234,16 @@ function frame(now) {
     const a = S3.anchors[s.id];
     const on = (h >= s.from && h <= s.to) || ovT > .5;
     const p = S3.project(a);
-    const show = on && p.visible && p.depth < 260 && !introAlive;
+    // 鸽群锚点可能在镜头外；其入口固定在左侧安全区域，不再随投影消失。
+    const pigeon = s.id === 'pigeon';
+    const show = on && (pigeon || (p.visible && p.depth < 260)) && !introAlive;
     s.el.classList.toggle('hidden', !show);
     // 屏幕微调：避开章节大字等画面元素
-    s.el.style.left = (p.x + (s.dx || 0)) + 'px';
-    s.el.style.top = (p.y + (s.dy || 0)) + 'px';
-    // 标签自动选边：靠屏幕中间时放到左边，避免压住章节大字
-    s.el.classList.toggle('flip', p.x > innerWidth * .42);
-    s.el.classList.toggle('near', show && atStop && p.depth < 60);
+    s.el.style.left = (pigeon ? Math.max(32, innerWidth * .08) : p.x + (s.dx || 0)) + 'px';
+    s.el.style.top = (pigeon ? innerHeight * .5 : p.y + (s.dy || 0)) + 'px';
+    // 鸽哨入口标签朝右，其余标签按屏幕位置选边。
+    s.el.classList.toggle('flip', !pigeon && p.x > innerWidth * .42);
+    s.el.classList.toggle('near', show && (pigeon || (atStop && p.depth < 60)));
   });
 
   requestAnimationFrame(frame);
