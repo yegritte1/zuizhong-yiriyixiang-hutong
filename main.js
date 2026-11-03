@@ -277,8 +277,20 @@ function openSpot(s) {
     const g = document.createElement('button'); g.className = 'btn';
     g.textContent = { maohou: '捏一只立体毛猴', kite: '绘一只沙燕 · 放上天', mask: '对镜勾脸谱（可用摄像头）' }[s.game];
     if (collected.has(s.game)) g.textContent += ' · 已盖印';
-    g.onclick = () => { closePanel(); openGame(s.game); };
+    // 毛猴：先看 40 秒非遗短片，看完直接进入捏毛猴
+    if (s.game === 'maohou') {
+      g.textContent = '▶ 《百年毛猴》· 看完动手捏';
+      g.onclick = () => { closePanel(); openVideo('maohou', () => openGame('maohou')); };
+    } else {
+      g.onclick = () => { closePanel(); openGame(s.game); };
+    }
     act.appendChild(g);
+    if (s.game === 'maohou') {
+      const v = document.createElement('button'); v.className = 'btn ghost';
+      v.textContent = '跳过短片，直接动手';
+      v.onclick = () => { closePanel(); openGame(s.game); };
+      act.appendChild(v);
+    }
   }
   const c = document.createElement('button'); c.className = 'btn ghost'; c.textContent = '继续逛';
   c.onclick = closePanel; act.appendChild(c);
@@ -407,54 +419,66 @@ function enter() {
   setTimeout(finishIntro, ENTER_MS + 900);      // 兜底：无论如何都会进入
   if (soundPref()) { setSound(true); paintSound(); }   // 首次交互即开声（浏览器要求用户手势）
 }
-// 视频放映厅控制
+// ---------------- 视频放映厅（多支短片通用） ----------------
 const vidModal = $('#videoModal');
 const introVidBtn = $('#introVidBtn');
-const introVideo = $('#introVideo');
 const vidSkipBtn = $('#vidSkipBtn');
 const vidEnterBtn = $('#vidEnterBtn');
+const vidTitle = $('.vid-title'), vidBadge = $('.vid-badge'), vidDur = $('.vid-dur'), vidSub = $('.vid-sub'), vidFrame = $('.vid-frame');
 
-function openIntroVideo() {
-  if (!vidModal || !introVideo) return;
+const VIDEOS = {
+  intro: {
+    src: './video/v1_intro.mp4', poster: './video/v1_poster.jpg',
+    badge: '序章短片', title: '《晨光入巷》', dur: '25 秒',
+    sub: '“北京的胡同是这座城最细的血管，从元大都算起，装着一户户人家的日子……”',
+    cta: '看完进入漫游', skip: '跳过，进入漫游'
+  },
+  maohou: {
+    src: './video/v2_maohou.mp4', poster: './video/v2_maohou_poster.jpg',
+    badge: '非遗短片', title: '《百年毛猴》', dur: '40 秒',
+    sub: '用几味中药，拼出一只猴。蝉蜕做头和四肢，辛夷做身子——老北京的手艺，留了下来。',
+    cta: '轮到你来捏一只', skip: '跳过，直接动手'
+  }
+};
+let vidOnDone = null, vidCurrent = null;
+
+function openVideo(key, onDone) {
+  const v = VIDEOS[key]; if (!v || !vidModal) return;
+  vidCurrent = v; vidOnDone = onDone || null;
+  vidTitle.textContent = v.title; vidBadge.textContent = v.badge; vidDur.textContent = v.dur; vidSub.textContent = v.sub;
+  vidEnterBtn.firstChild.textContent = v.cta + ' ';
+  vidSkipBtn.firstChild.textContent = v.skip + ' ';
+  vidFrame.innerHTML = `<video id="introVideo" preload="auto" poster="${v.poster}" playsinline controls>
+      <source src="${v.src}" type="video/mp4" /></video>`;
+  const el2 = vidFrame.querySelector('video');
   vidModal.classList.add('open');
   vidModal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('locked');
   duckBgm(true);
-  try {
-    introVideo.currentTime = 0;
-    introVideo.play().catch(() => {});
-  } catch (e) {}
+  try { el2.currentTime = 0; el2.play().catch(() => {}); } catch (e) {}
+  el2.addEventListener('ended', () => { setTimeout(() => closeVideo(true), 500); });
 }
-
-function closeIntroVideo(andEnter = false) {
-  if (!vidModal || !introVideo) return;
-  introVideo.pause();
+function closeVideo(goNext) {
+  if (!vidModal) return;
+  const el2 = vidFrame.querySelector('video');
+  if (el2) el2.pause();
   vidModal.classList.remove('open');
   vidModal.setAttribute('aria-hidden', 'true');
   duckBgm(false);
-  if (andEnter) {
-    if (introAlive) enter();
-    else document.body.classList.remove('locked');
-  } else {
-    if (!introAlive) document.body.classList.remove('locked');
-  }
+  const fn = vidOnDone; vidOnDone = null; vidCurrent = null;
+  if (goNext && fn) fn();
+  else if (!introAlive) document.body.classList.remove('locked');
 }
+function openIntroVideo() { openVideo('intro', () => { if (introAlive) enter(); else document.body.classList.remove('locked'); }); }
 
 if (introVidBtn) {
-  introVidBtn.addEventListener('click', e => {
-    e.stopPropagation();
-    openIntroVideo();
-  });
+  introVidBtn.addEventListener('click', e => { e.stopPropagation(); openIntroVideo(); });
   introVidBtn.addEventListener('pointerdown', e => e.stopPropagation());
 }
-if (vidSkipBtn) vidSkipBtn.addEventListener('click', () => closeIntroVideo(true));
-if (vidEnterBtn) vidEnterBtn.addEventListener('click', () => closeIntroVideo(true));
-if (introVideo) {
-  introVideo.addEventListener('ended', () => {
-    setTimeout(() => closeIntroVideo(true), 600);
-  });
-}
+if (vidSkipBtn) vidSkipBtn.addEventListener('click', () => closeVideo(true));
+if (vidEnterBtn) vidEnterBtn.addEventListener('click', () => closeVideo(true));
 window.__openIntroVideo = openIntroVideo;
+window.__openVideo = openVideo;
 
 // 轻轻一滑 / 一点 / 任意键就进入
 intro.addEventListener('wheel', e => { e.preventDefault(); if (Math.abs(e.deltaY) + Math.abs(e.deltaX) > 2) { peekP = .04; enter(); } }, { passive: false });
