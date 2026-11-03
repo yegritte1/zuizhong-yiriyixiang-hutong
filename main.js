@@ -261,7 +261,22 @@ function spawnBirds() {
 const collected = new Set();
 const lifeSeals = new Set();   // 胡同小印（生活场景）
 function openSpot(s) {
-  if (s.finale) return openFinale();
+  if (s.finale) {
+    $('#panelKicker').textContent = s.kicker; $('#panelTitle').textContent = s.title;
+    $('#panelText').innerHTML = s.text.map(t => `<p>${t}</p>`).join('');
+    snapSpot = s;
+    const act = $('#panelActions'); act.innerHTML = '';
+    const v = document.createElement('button'); v.className = 'btn';
+    v.textContent = '▶ 先看《北京给你的信》';
+    v.onclick = () => { closePanel(); openVideo('finale', () => openFinale()); };
+    act.appendChild(v);
+    const g = document.createElement('button'); g.className = 'btn ghost';
+    g.textContent = '跳过，直接领门牌';
+    g.onclick = () => { closePanel(); openFinale(); };
+    act.appendChild(g);
+    $('#panel').classList.add('open');
+    return;
+  }
   if (s.life === 'breakfast') return openBreakfast({ sealed: () => lifeSeals.has('早'), onSeal: () => { lifeSeals.add('早'); } });
   if (s.life === 'pigeon') return openPigeon({ sealed: () => lifeSeals.has('鸽'), onSeal: () => { lifeSeals.add('鸽'); } });
   if (s.life === 'yard') return openYard({ sealed: () => lifeSeals.has('院'), onSeal: () => { lifeSeals.add('院'); } });
@@ -371,6 +386,7 @@ function openFinale() {
   $('#plateSeals').innerHTML = [['maohou', '猴'], ['kite', '鸢'], ['mask', '谱']]
     .map(([k, c]) => `<span class="${collected.has(k) ? '' : 'off'}">${c}</span>`).join('')
     + [...lifeSeals].map(c => `<span class="life-seal">${c}</span>`).join('');
+  $('#finaleLetterBtn').style.display = '';
   $('#finaleText').innerHTML = n === 3
     ? '清晨的毛猴、午后的沙燕、入夜的脸谱，<br/>都留在了这块门牌上。这条胡同，记住了你。'
     : `你收集了 ${n} / 3 枚非遗印记。<br/>胡同还在，明天再来，把剩下的手艺找回来。`;
@@ -379,6 +395,30 @@ function openFinale() {
 }
 $('#againBtn').onclick = () => { $('#finale').classList.remove('open'); document.body.classList.remove('locked'); scrollTo({ top: 0, behavior: 'smooth' }); };
 $('#finaleClose').onclick = () => { $('#finale').classList.remove('open'); document.body.classList.remove('locked'); };
+
+// 北京的信
+const letterModal = $('#letterModal');
+function openLetter() {
+  if (!letterModal) return;
+  letterModal.classList.add('open');
+  letterModal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('locked');
+}
+function closeLetter() {
+  if (!letterModal) return;
+  letterModal.classList.remove('open');
+  letterModal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('locked');
+}
+const finaleLetterBtn = $('#finaleLetterBtn');
+if (finaleLetterBtn) finaleLetterBtn.addEventListener('click', openLetter);
+const letterClose = $('#letterClose');
+if (letterClose) letterClose.addEventListener('click', closeLetter);
+if (letterModal) {
+  letterModal.addEventListener('click', e => {
+    if (e.target === letterModal || e.target.classList.contains('letter-backdrop')) closeLetter();
+  });
+}
 
 /* ---------------- HUD 按钮 ---------------- */
 $('#mapBtn').onclick = () => { overview = !overview; $('#mapBtn').firstChild.textContent = overview ? '返 回' : '全 图'; };
@@ -457,6 +497,12 @@ const VIDEOS = {
     badge: '非遗短片', title: '《京剧脸谱》', dur: '40 秒',
     sub: '红忠勇、黑刚直、白奸诈、蓝桀骜——一笔一色，画尽人间性情。',
     cta: '轮到你来勾一张', skip: '跳过，直接动手'
+  },
+  finale: {
+    src: './video/v5_finale.mp4', poster: './video/v5_finale_poster.jpg',
+    badge: '尾声短片', title: '《北京给你的信》', dur: '39 秒',
+    sub: '这条胡同记住了你。',
+    cta: '领取你的门牌', skip: '跳过，直接领门牌'
   }
 };
 let vidOnDone = null, vidCurrent = null;
