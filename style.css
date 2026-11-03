@@ -718,8 +718,8 @@ body.locked #chapter,body.locked #timeline,body.locked #hotspots{opacity:0!impor
 .letter-modal{position:fixed;inset:0;z-index:92;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .45s ease}
 .letter-modal.open{opacity:1;pointer-events:auto}
 .letter-backdrop{position:absolute;inset:0;background:rgba(20,16,14,.78);backdrop-filter:blur(10px)}
-.letter-dialog{position:relative;z-index:2;width:min(90vw,640px);max-height:86vh;overflow-y:auto;
-  background:linear-gradient(180deg,#faf6ed 0%,#f3ece0 100%);padding:48px 44px 40px;border-radius:4px;
+.letter-dialog{position:relative;z-index:2;width:min(90vw,640px);
+  background:linear-gradient(180deg,#faf6ed 0%,#f3ece0 100%);padding:42px 44px 36px;border-radius:4px;
   box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 0 0 1px rgba(184,50,42,.18);
   transform:translateY(18px) rotate(-.4deg);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 .letter-modal.open .letter-dialog{transform:none}
@@ -731,7 +731,7 @@ body.locked #chapter,body.locked #timeline,body.locked #hotspots{opacity:0!impor
   background:var(--red);color:#fbefdc;display:grid;place-items:center;font-family:"YRTitle",var(--serif);font-size:28px;
   box-shadow:0 4px 14px rgba(184,50,42,.35);transform:rotate(8deg)}
 .letter-dialog h3{font-family:"YRTitle",var(--serif);font-size:clamp(1.6rem,3.2vw,2.2rem);font-weight:400;letter-spacing:.25em;color:var(--ink);margin:0 0 28px;padding-bottom:16px;border-bottom:1px solid rgba(184,50,42,.25)}
-.letter-body{font-size:15.5px;line-height:2.2;letter-spacing:.06em;color:#3f3a32;font-family:"Noto Serif SC",serif}
+.letter-body{font-size:15px;line-height:2;letter-spacing:.06em;color:#3f3a32;font-family:"Noto Serif SC",serif}
 .letter-body p{margin:0 0 .9em}
 .letter-sign{text-align:right;margin-top:24px;font-style:italic;color:var(--red);letter-spacing:.15em}
 .letter-stamp{position:absolute;right:0;bottom:-8px;width:90px;height:90px;border-radius:50%;border:3px solid var(--red);
@@ -739,6 +739,6 @@ body.locked #chapter,body.locked #timeline,body.locked #hotspots{opacity:0!impor
   opacity:.35;transform:rotate(-12deg);pointer-events:none}
 @media (max-width: 768px) {
   .letter-dialog{padding:32px 22px 28px}
-  .letter-body{font-size:14px;line-height:2}
+  .letter-body{font-size:14px;line-height:1.85}
   .letter-stamp{width:70px;height:70px;font-size:12px}
 }
