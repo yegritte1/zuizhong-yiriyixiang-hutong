@@ -55,7 +55,7 @@ const SPOTS = [
            '扎、糊、绘、放，号称风筝四艺。绘的时候讲究对称、色彩浓烈，蝙蝠、寿桃、牡丹都是常见纹样。',
            '<span class="tag">扎</span><span class="tag">糊</span><span class="tag">绘</span><span class="tag">放</span>'],
     game: 'kite' },
-  { id: 'pigeon', x: .3, y: .7, from: 5, to: 18, label: '鸽哨 · 让鸽子摆字', life: 'pigeon',
+  { id: 'pigeon', x: .3, y: .74, from: 5, to: 18, label: '鸽哨 · 让鸽子摆字', life: 'pigeon',
     kicker: '胡同上空', title: '鸽哨',
     text: ['“嗡——”一群鸽子掠过屋脊，鸽哨在风里响。这是老北京天空的声音。'] },
   { id: 'opera', x: .12, y: .4, from: 16, to: 21, label: '戏楼 · 听一出', img: 'opera', life: 'opera',
