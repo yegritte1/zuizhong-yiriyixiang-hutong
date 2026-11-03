@@ -504,7 +504,7 @@ export function initScene(canvas) {
   cage.position.set(1.5, 4.2, -14); world.add(cage);
 
   // 风筝
-  const kiteG = kite(); kiteG.position.set(-28, 15, 13); world.add(kiteG);
+  const kiteG = kite(); kiteG.position.set(-25, 15, 17); world.add(kiteG);
   const kiteLineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-28, 15, 13), new THREE.Vector3(-23.5, 6, 7), new THREE.Vector3(-19.7, 1.25, 2.9)]);
   const kiteLine = new THREE.Line(kiteLineGeo, inkMat); world.add(kiteLine);
 
@@ -642,7 +642,7 @@ export function initScene(canvas) {
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
   const anchors = {
     breakfast: V(95, 2.6, 7), store: V(108, 4.4, -4), maohou: V(84, 1.6, -15), yard: V(1.5, 4.2, -14),
-    kite: V(-28, 15.5, 13), pigeon: V(40, 27, 0), opera: V(-90, 8, 9), mask: V(-104, 3, 12), gate: V(-20.6, 2.2, -2)
+    kite: V(-25, 15.5, 17), pigeon: V(40, 27, 0), opera: V(-90, 8, 9), mask: V(-104, 3, 12), gate: V(-20.6, 2.2, -2)
   };
 
   /* ---------- 更新 ---------- */
