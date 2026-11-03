@@ -55,7 +55,7 @@ const SPOTS = [
            '扎、糊、绘、放，号称风筝四艺。绘的时候讲究对称、色彩浓烈，蝙蝠、寿桃、牡丹都是常见纹样。',
            '<span class="tag">扎</span><span class="tag">糊</span><span class="tag">绘</span><span class="tag">放</span>'],
     game: 'kite' },
-  { id: 'pigeon', x: .3, y: .74, from: 5, to: 18, label: '鸽哨 · 让鸽子摆字', life: 'pigeon',
+  { id: 'pigeon', x: .3, y: .74, from: 5, to: 18, label: '鸽哨 · 让鸽子摆字', life: 'pigeon', dy: 165, dx: -120,
     kicker: '胡同上空', title: '鸽哨',
     text: ['“嗡——”一群鸽子掠过屋脊，鸽哨在风里响。这是老北京天空的声音。'] },
   { id: 'opera', x: .12, y: .4, from: 16, to: 21, label: '戏楼 · 听一出', img: 'opera', life: 'opera',
@@ -68,7 +68,11 @@ const SPOTS = [
            '同一个角色在不同戏里，脸谱也一笔不差地传承下来。',
            '<span class="tag">红·忠勇</span><span class="tag">黑·刚直</span><span class="tag">白·奸诈</span>'],
     game: 'mask' },
-  { id: 'gate', x: .5, y: .63, from: 21, to: 24, heritage: true, label: '领取你的门牌',
+  { id: 'gate', x: .5, y: .63, from: 21, to: 24, heritage: true, label: '领取你的门牌', img: 'gate',
+    kicker: '深夜 · 23:00', title: '领取你的门牌',
+    text: ['夜深了，巷口的灯还亮着。这条胡同从拂晓到深夜，你走了一整天。',
+           '先看一封北京写给你的信，再把属于你的门牌领走——上面会盖上你今天收集到的每一枚印记。',
+           '<span class="tag">门牌</span><span class="tag">胡同印记</span>'],
     finale: true }
 ];
 
@@ -232,7 +236,11 @@ function frame(now) {
     const p = S3.project(a);
     const show = on && p.visible && p.depth < 260 && !introAlive;
     s.el.classList.toggle('hidden', !show);
-    s.el.style.left = p.x + 'px'; s.el.style.top = p.y + 'px';
+    // 屏幕微调：避开章节大字等画面元素
+    s.el.style.left = (p.x + (s.dx || 0)) + 'px';
+    s.el.style.top = (p.y + (s.dy || 0)) + 'px';
+    // 标签自动选边：靠屏幕中间时放到左边，避免压住章节大字
+    s.el.classList.toggle('flip', p.x > innerWidth * .42);
     s.el.classList.toggle('near', show && atStop && p.depth < 60);
   });
 
@@ -262,8 +270,8 @@ const collected = new Set();
 const lifeSeals = new Set();   // 胡同小印（生活场景）
 function openSpot(s) {
   if (s.finale) {
-    $('#panelKicker').textContent = s.kicker; $('#panelTitle').textContent = s.title;
-    $('#panelText').innerHTML = s.text.map(t => `<p>${t}</p>`).join('');
+    $('#panelKicker').textContent = s.kicker || ''; $('#panelTitle').textContent = s.title || '';
+    $('#panelText').innerHTML = (s.text || []).map(t => `<p>${t}</p>`).join('');
     snapSpot = s;
     const act = $('#panelActions'); act.innerHTML = '';
     const v = document.createElement('button'); v.className = 'btn';
@@ -275,6 +283,7 @@ function openSpot(s) {
     g.onclick = () => { closePanel(); openFinale(); };
     act.appendChild(g);
     $('#panel').classList.add('open');
+    requestAnimationFrame(fitPanel);
     return;
   }
   if (s.life === 'breakfast') return openBreakfast({ sealed: () => lifeSeals.has('早'), onSeal: () => { lifeSeals.add('早'); } });
@@ -316,8 +325,19 @@ function openSpot(s) {
   const c = document.createElement('button'); c.className = 'btn ghost'; c.textContent = '继续逛';
   c.onclick = closePanel; act.appendChild(c);
   $('#panel').classList.add('open');
+  requestAnimationFrame(fitPanel);
 }
 function closePanel() { $('#panel').classList.remove('open'); }
+// 面板永远一屏显示：内容超高时自动等比缩小，而不是出现滚动条
+function fitPanel() {
+  const panel = $('#panel'), inner = $('#panelInner');
+  if (!panel || !inner) return;
+  inner.style.transform = 'none';
+  const avail = Math.min(innerHeight * .9, 900);
+  const need = inner.scrollHeight;
+  const k = need > avail ? Math.max(.62, avail / need) : 1;
+  inner.style.transform = k < 1 ? `scale(${k.toFixed(3)})` : 'none';
+}
 let snapSpot = null;
 const snapCv = document.createElement('canvas');
 function takeSnap(s) {
@@ -326,7 +346,9 @@ function takeSnap(s) {
   const cx = clamp(p.x * sx - W / 2, 0, gl.width - W), cy = clamp(p.y * sx - H * .55, 0, gl.height - H);
   snapCv.width = 760; snapCv.height = 428;
   snapCv.getContext('2d').drawImage(gl, cx, cy, W, H, 0, 0, 760, 428);
-  $('#panelImg').src = snapCv.toDataURL('image/jpeg', .86);
+  const im = $('#panelImg');
+  im.onload = () => { if (window.fitPanel) fitPanel(); };
+  im.src = snapCv.toDataURL('image/jpeg', .86);
 }
 $('#panelClose').onclick = closePanel;
 $('#gl').addEventListener('click', closePanel);
@@ -358,6 +380,8 @@ function closeGame() {
   $('#game').className = ''; document.body.classList.remove('locked'); curGame = null;
   if (gameState.dispose) gameState.dispose(); gameState = {};
 }
+window.fitPanel = fitPanel;
+window.addEventListener('resize', () => { if ($('#panel').classList.contains('open')) fitPanel(); });
 window.__openGame = openGame; window.__goTo = goTo; window.__done = () => $('#gameDone').click();
 $('#gameClose').onclick = closeGame;
 $('#gameReset').onclick = () => openGame(curGame);
