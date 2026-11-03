@@ -31,12 +31,6 @@ const N = STOPS.length;
 
 /* ---------------- 热点 ---------------- */
 const SPOTS = [
-  { id: 'awakening', x: .86, y: .46, from: 5, to: 7.5, label: '导览 · 晨光入巷',
-    kicker: '序章 · 05:30', title: '晨光入巷',
-    text: ['“北京的胡同是这座城最细的血管，从元大都算起，装着一户户人家的日子……”',
-           '晨光初现，炊烟与鸽哨唤醒了老城。戴上耳机，跟随光影漫步一日胡同。',
-           '<span class="tag">序幕导览</span><span class="tag">25秒短片</span>'],
-    video: 'intro' },
   { id: 'breakfast', x: .78, y: .63, from: 5, to: 11, label: '早点摊 · 挑份早饭', img: 'breakfast', life: 'breakfast',
     kicker: '清晨 · 06:45', title: '早点摊',
     text: ['天还没亮透，胡同口的蒸笼已经冒气了。豆汁儿、焦圈、炸油条、糖葫芦——北京人的一天，从一碗热乎的开始。',
@@ -279,12 +273,6 @@ function openSpot(s) {
   // 配图：直接截取当前 3D 画面里这个热点周围的一块，和场景风格统一
   snapSpot = s;
   const act = $('#panelActions'); act.innerHTML = '';
-  if (s.video === 'intro') {
-    const v = document.createElement('button'); v.className = 'btn';
-    v.textContent = '🎬 观赏《晨光入巷》导览短片 (25s)';
-    v.onclick = () => { closePanel(); openIntroVideo(); };
-    act.appendChild(v);
-  }
   if (s.game) {
     const g = document.createElement('button'); g.className = 'btn';
     g.textContent = { maohou: '捏一只立体毛猴', kite: '绘一只沙燕 · 放上天', mask: '对镜勾脸谱（可用摄像头）' }[s.game];
