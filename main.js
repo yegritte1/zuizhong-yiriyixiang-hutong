@@ -137,7 +137,12 @@ let introAlive = true, introP = 0;
 let target = 0, prog = 0, overview = false, ovT = 0;
 let mouseX = 0, mouseY = 0, mx = 0, my = 0;
 const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
-addEventListener('scroll', () => { target = clamp(scrollY / maxScroll()) * (N - 1); $('#scrollHint').classList.add('hide'); }, { passive: true });
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+addEventListener('scroll', () => {
+  if (introAlive) { target = prog = 0; if (scrollY !== 0) scrollTo({ top: 0, behavior: 'instant' }); return; }
+  target = clamp(scrollY / maxScroll()) * (N - 1);
+  $('#scrollHint').classList.add('hide');
+}, { passive: true });
 addEventListener('mousemove', e => { mouseX = e.clientX / innerWidth - .5; mouseY = e.clientY / innerHeight - .5; });
 function goTo(i) { overview = false; scrollTo({ top: i / (N - 1) * maxScroll(), behavior: 'smooth' }); }
 /* 一滑一站：滚轮/触控板/滑动一次就飞到下一个时间点，不用使劲滚 */
@@ -468,6 +473,9 @@ const ENTER_MS = 5200;   // 慢慢推门、慢慢往里走
 intro.addEventListener('mousemove', e => { imx = e.clientX / innerWidth - .5; imy = e.clientY / innerHeight - .5; });
 function finishIntro() {
   if (!intro.isConnected) return;
+  scrollTo({ top: 0, behavior: 'instant' });
+  target = prog = 0; overview = false; ovT = 0;
+  wAcc = 0; wT = performance.now(); wheelConsumed = true;
   introP = 1; introAlive = false; $('#gl').style.filter = ''; snapLock = performance.now() + 900;
   document.body.classList.remove('locked'); intro.remove();
 }
@@ -491,8 +499,9 @@ function enter() {
   if (entering || !intro.isConnected) return;
   entering = true; enterT0 = performance.now();
   intro.style.pointerEvents = 'none';           // 立刻放行，不再挡住页面
-  document.body.classList.remove('locked');
-  setTimeout(finishIntro, ENTER_MS + 900);      // 兜底：无论如何都会进入
+  scrollTo({ top: 0, behavior: 'instant' }); target = prog = 0;
+  document.body.classList.add('locked');       // 入场完成前不允许滚动到其他时间点
+  setTimeout(finishIntro, ENTER_MS + 900);      // 入场动画兜底
   if (soundPref()) { setSound(true); paintSound(); }   // 首次交互即开声（浏览器要求用户手势）
 }
 // ---------------- 视频放映厅（多支短片通用） ----------------
